@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="React 全家桶提供给了我们一套较为成熟的解决方案。可以应对各种复杂前端 web 系统。但是当你熟悉了之后会发现，许多时候都在机械劳作和编写模板代码。针对这种情况，我们是否有办法把机械劳作和模板代码交给程序去做，我们只要关心业务如何实现就可以了？MirrorJS 就是在这种情况下产生的，它封装了 Redux 数据流的过程，给开发人员提供了非常大的便利。一款简洁、高效、易上手的 React 框架。">
+<meta name="keywords" content="MirrorJS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MirrorJS源码解读">
+<meta property="og:url" content="https://ruolong.wang/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/index.html">
+<meta property="og:site_name" content="大大白的个人博客">
+<meta property="og:description" content="React 全家桶提供给了我们一套较为成熟的解决方案。可以应对各种复杂前端 web 系统。但是当你熟悉了之后会发现，许多时候都在机械劳作和编写模板代码。针对这种情况，我们是否有办法把机械劳作和模板代码交给程序去做，我们只要关心业务如何实现就可以了？MirrorJS 就是在这种情况下产生的，它封装了 Redux 数据流的过程，给开发人员提供了非常大的便利。一款简洁、高效、易上手的 React 框架。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://ruolong.wang/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/redux_flow.png">
+<meta property="og:image" content="https://ruolong.wang/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/代码结构.png">
+<meta property="og:image" content="https://ruolong.wang/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/redux_middlewave.png">
+<meta property="og:updated_time" content="2020-05-09T15:55:28.525Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MirrorJS源码解读">
+<meta name="twitter:description" content="React 全家桶提供给了我们一套较为成熟的解决方案。可以应对各种复杂前端 web 系统。但是当你熟悉了之后会发现，许多时候都在机械劳作和编写模板代码。针对这种情况，我们是否有办法把机械劳作和模板代码交给程序去做，我们只要关心业务如何实现就可以了？MirrorJS 就是在这种情况下产生的，它封装了 Redux 数据流的过程，给开发人员提供了非常大的便利。一款简洁、高效、易上手的 React 框架。">
+<meta name="twitter:image" content="https://ruolong.wang/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/redux_flow.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://ruolong.wang/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>MirrorJS源码解读 | 大大白的个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">大大白的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">人生就像一场旅行，身体和灵魂总有一个要在路上！</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works1">
+    <a href="/blog/works1/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>H5小游戏1</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works2">
+    <a href="/blog/works2/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>H5小游戏2</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-fiction">
+    <a href="/blog/fiction/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>大将军归来</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ruolong.wang/blog/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大大白">
+      <meta itemprop="description" content="沉淀下来的东西，才是真正属于自己的财富！">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大大白的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MirrorJS源码解读
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-12-24 15:55:00" itemprop="dateCreated datePublished" datetime="2019-12-24T15:55:00+08:00">2019-12-24</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-05-09 23:55:28" itemprop="dateModified" datetime="2020-05-09T23:55:28+08:00">2020-05-09</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/" itemprop="url" rel="index"><span itemprop="name">WEB前端</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/源码解读/" itemprop="url" rel="index"><span itemprop="name">源码解读</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>React 全家桶提供给了我们一套较为成熟的解决方案。可以应对各种复杂前端 web 系统。但是当你熟悉了之后会发现，许多时候都在机械劳作和编写模板代码。针对这种情况，我们是否有办法把机械劳作和模板代码交给程序去做，我们只要关心业务如何实现就可以了？MirrorJS 就是在这种情况下产生的，它封装了 Redux 数据流的过程，给开发人员提供了非常大的便利。一款简洁、高效、易上手的 React 框架。</p>
+<a id="more"></a>
+<h2 id="背景介绍"><a href="#背景介绍" class="headerlink" title="背景介绍"></a>背景介绍</h2><p>Mirror官方文档说明了当前React+Redux的应用存在的一些问题。</p>
+<p>一个典型的 React/Redux 应用看起来像下面这样：</p>
+<p>一个 actions/ 目录用来手动创建所有的 action type（或者 action creator）；<br>一个 reducers/ 目录以及无数的 switch 来捕获所有的 action type；<br>必须要依赖 middleware 才能处理 异步 action；<br>明确调用 dispatch 方法来 dispatch 所有的 action；<br>手动创建 history 对象关联路由组件，可能还需要与 store 同步；<br>调用 history 上的方法或者 dispatch action 来手动更新路由；<br>存在的问题？太多的 样板文件 以及繁琐甚至重复的劳动。</p>
+<p>实际上，上述大部分操作都是可以简化的。比如，在单个 API 中创建所有的 action 和 reducer；比如，简单地调用一个函数来 dispatch 所有的同步和异步 action，且不需要额外引入 middleware；再比如，使用路由的时候只需要关心定义具体的路由，不用去关心 history 对象，等等。</p>
+<p>这正是 Mirror 的使命，用极少数的 API 封装所有繁琐甚至重复的工作，提供一种简洁高效的更高级抽象，同时保持原有的开发模式。</p>
+<h3 id="常规开发"><a href="#常规开发" class="headerlink" title="常规开发"></a>常规开发</h3><p>举个例子来说开发一个登陆页面，可能需要涉及到以下几个文件。</p>
+<ol>
+<li><code>login.js</code>基础布局样式，页面逻辑。</li>
+<li><code>loginSmart.js</code>连接redux中的状态和方法。</li>
+<li><code>loginAction.js</code>方法名称。</li>
+<li><code>actionTypes.js</code>方法类型。</li>
+<li><code>rootSaga.js</code>在中间件监听事件方法类型。</li>
+<li><code>loginSaga.js</code>中间件捕获之后的具体执行内容。</li>
+<li><code>loginService.js</code>发起接口请求。</li>
+<li><code>loginReducer.js</code>存储接口返回的结果。<br><img src="redux_flow.png"></li>
+</ol>
+<h3 id="使用MirrorJS"><a href="#使用MirrorJS" class="headerlink" title="使用MirrorJS"></a>使用MirrorJS</h3><p>这是一个简单的示例</p>
+<ol>
+<li>如果开发人员愿意，他可以把代码都放在一个文件里面就能完成功能开发，并且它是基于redux数据流的。</li>
+<li>reducers里面的方法名称取代了<code>3. loginAction.js</code>，<code>4. actionTypes.js</code>,<code>8. loginReducer.js</code></li>
+<li>effects不仅包含reducers的能力，而且还取代了<code>5 rootSaga.js</code>，<code>6 loginSaga.js</code>，<code>7 loginService.js</code></li>
+<li>剩下的<code>1 login.js</code>和<code>2 loginSmart.js</code>，他们的思路基本一致都是分成了dump和smart组件</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> mirror, &#123;actions, connect, render&#125; <span class="keyword">from</span> <span class="string">'mirrorx'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 声明 Redux state, reducer 和 action，</span></span><br><span class="line"><span class="comment">// 所有的 action 都会以相同名称赋值到全局的 actions 对象上</span></span><br><span class="line">mirror.model(&#123;</span><br><span class="line">  name: <span class="string">'app'</span>,</span><br><span class="line">  initialState: <span class="number">0</span>,</span><br><span class="line">  reducers: &#123;</span><br><span class="line">    increment(state) &#123; </span><br><span class="line">       <span class="keyword">return</span> state + <span class="number">1</span> </span><br><span class="line">      &#125;,</span><br><span class="line">    decrement(state) &#123; </span><br><span class="line">       <span class="keyword">return</span> state - <span class="number">1</span> </span><br><span class="line">      &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  effects: &#123;</span><br><span class="line">    <span class="keyword">async</span> incrementAsync() &#123;</span><br><span class="line">      <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">          resolve()</span><br><span class="line">        &#125;, <span class="number">1000</span>)</span><br><span class="line">      &#125;)</span><br><span class="line">      actions.app.increment()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用 react-redux 的 connect 方法，连接 state 和组件</span></span><br><span class="line"><span class="keyword">const</span> App = connect(<span class="function"><span class="params">state</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;<span class="attr">count</span>: state.app&#125;</span><br><span class="line">&#125;)(<span class="function"><span class="params">props</span> =&gt;</span> (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;h1&gt;&#123;props.count&#125;&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">      &#123;/</span>* 调用 actions 上的方法来 dispatch action *<span class="regexp">/&#125;</span></span><br><span class="line"><span class="regexp">      &lt;button onClick=&#123;() =&gt; actions.app.decrement()&#125;&gt;-&lt;/</span>button&gt;</span><br><span class="line">      &lt;button onClick=&#123;() =&gt; actions.app.increment()&#125;&gt;+&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">      &#123;/</span>* dispatch <span class="keyword">async</span> action *<span class="regexp">/&#125;</span></span><br><span class="line"><span class="regexp">      &lt;button onClick=&#123;() =&gt; actions.app.incrementAsync()&#125;&gt;+ Async&lt;/</span>button&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">  )</span></span><br><span class="line"><span class="regexp">)</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 启动 app，render 方法是加强版的 ReactDOM.render</span></span><br><span class="line"><span class="regexp">render(&lt;App/</span>&gt;, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h2 id="思考几个问题"><a href="#思考几个问题" class="headerlink" title="思考几个问题"></a>思考几个问题</h2><p>这样知道他们的对应关系后，我们才能更好的去解读源码。但是在解读源码之前我希望大家能思考几个问题。</p>
+<ol>
+<li><code>mirror.model({})</code> 这种写法是使用了 js 里面什么设计模式？充分利用了 js 的什么特性？</li>
+<li>使用 <code>actions.modelName.increment()</code> 是如何进到这里的？为什么按照 model 这种写法之后，我就可以用 <code>actions.modelName.increment()</code> 去调用 model 里面的方法了。</li>
+<li>model 中的 reducers 和 effects 里面的 function 究竟是 action 还是 reducer？</li>
+<li>effects 和 reducers 有什么区别？都写到 effects 里面可不可以？effects 和 reducers 都是利用了 js 的什么特性？</li>
+<li>reducer 是什么东西？为什么叫做 reducer？reducer 有什么注意事项？</li>
+<li>hook 是怎么实现做到拦截全局 action 的？</li>
+</ol>
+<h2 id="源码解读"><a href="#源码解读" class="headerlink" title="源码解读"></a>源码解读</h2><p>推荐 clone 我的源码<a href="https://github.com/wangruolong/web-front-end/tree/master/source-code-mirrorjs" target="_blank" rel="noopener">https://github.com/wangruolong/web-front-end/tree/master/source-code-mirrorjs</a><br>里面有大量的注释和精心制作的运行结果，可以助你快速掌握！</p>
+<p><img src="代码结构.png"></p>
+<h3 id="model-js"><a href="#model-js" class="headerlink" title="model.js"></a>model.js</h3><p>作用：把 reducer封装成闭包，在全局范围内使用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; resolveReducers, addActions &#125; <span class="keyword">from</span> <span class="string">'./actions'</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> models = []</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">model</span>(<span class="params">m</span>) </span>&#123;</span><br><span class="line">  m = validateModel(m)<span class="comment">// 1.检查数据格式，过滤掉非函数的键值对。</span></span><br><span class="line">  <span class="keyword">const</span> reducer = getReducer(resolveReducers(m.name, m.reducers), m.initialState)<span class="comment">// 2. 返回一个在全局范围内可以使用的闭包。</span></span><br><span class="line">  <span class="keyword">const</span> _model = &#123; <span class="attr">name</span>: m.name, reducer &#125;</span><br><span class="line">  models.push(_model)<span class="comment">// 3.最终的结果就是model里面放的元素都是包含action2reducer的方法，可以直接调用改变reducer。</span></span><br><span class="line">  addActions(m.name, m.reducers, m.effects)<span class="comment">// 4.把model名称，reducers和effects放到全局action里面。</span></span><br><span class="line">  <span class="keyword">return</span> _model</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>reducers 是`resolveReducers(m.name, m.reducers)`返回的，一个带模块名的map对象，这个对象的key全局唯一。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> </span>initialState 如果没有设定initialState，则设置为null</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getReducer</span>(<span class="params">reducers, initialState = null</span>) </span>&#123;</span><br><span class="line">   <span class="comment">// 返回一个闭包，这个闭包包含了name=app的model里面的reducers方法。&#123;app/increment:()=&gt;&#123;...&#125;,app/decrement:()=&gt;&#123;...&#125;&#125;</span></span><br><span class="line">   <span class="keyword">return</span> <span class="function">(<span class="params">state = initialState, action</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">typeof</span> reducers[action.type] === <span class="string">'function'</span>) &#123;</span><br><span class="line">         <span class="keyword">return</span> reducers[action.type](state, action.data)<span class="comment">// reducers[action.type]相当于redux 中的reducer的switch case</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> state</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">validateModel</span>(<span class="params">m = &#123;&#125;</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; name, reducers, effects &#125; = m</span><br><span class="line">  <span class="keyword">const</span> isObject = <span class="function"><span class="params">target</span> =&gt;</span> <span class="built_in">Object</span>.prototype.toString.call(target) === <span class="string">'[object Object]'</span></span><br><span class="line">  <span class="keyword">if</span> (!name || <span class="keyword">typeof</span> name !== <span class="string">'string'</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`Model name must be a valid string!`</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (name === <span class="string">'routing'</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`Model name can not be "routing", it is used by react-router-redux!`</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (models.find(<span class="function"><span class="params">item</span> =&gt;</span> item.name === name)) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`Model "<span class="subst">$&#123;name&#125;</span>" has been created, please select another name!`</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (reducers !== <span class="literal">undefined</span> &amp;&amp; !isObject(reducers)) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`Model reducers must be a valid object!`</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (effects !== <span class="literal">undefined</span> &amp;&amp; !isObject(effects)) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`Model effects must be a valid object!`</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  m.reducers = filterReducers(reducers)</span><br><span class="line">  m.effects = filterReducers(effects)</span><br><span class="line">  <span class="keyword">return</span> m</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">filterReducers</span>(<span class="params">reducers</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!reducers) &#123; <span class="keyword">return</span> reducers &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">Object</span>.keys(reducers)</span><br><span class="line">    .reduce(<span class="function">(<span class="params">acc, action</span>) =&gt;</span> &#123;<span class="comment">// 过滤掉不是function的键值对，只保留function的键值对。</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">typeof</span> reducers[action] === <span class="string">'function'</span>) &#123;</span><br><span class="line">        acc[action] = reducers[action]</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> acc</span><br><span class="line">    &#125;, &#123;&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="actions-js"><a href="#actions-js" class="headerlink" title="actions.js"></a>actions.js</h3><p>作用：把 reducer 和 effects 转换成 redux 能识别的 action类似这种<code>dispatch({ type:${modelName}${SEP}${actionName}, data })</code></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; dispatch &#125; <span class="keyword">from</span> <span class="string">'./middleware'</span></span><br><span class="line"><span class="keyword">import</span> &#123; options &#125; <span class="keyword">from</span> <span class="string">'./defaults'</span></span><br><span class="line"><span class="keyword">const</span> SEP = <span class="string">'/'</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> actions = &#123;&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">addActions</span>(<span class="params">modelName, reducers = &#123;&#125;, effects = &#123;&#125;</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">Object</span>.keys(reducers).length || <span class="built_in">Object</span>.keys(effects).length) &#123;<span class="comment">// 1.验证并初始化对象，防止出现 undefined</span></span><br><span class="line">    actions[modelName] = actions[modelName] || &#123;&#125;</span><br><span class="line">  &#125;</span><br><span class="line">  each(reducers, actionName =&gt; &#123;<span class="comment">// 2.把reducer放到actions里面</span></span><br><span class="line">    actions[modelName][actionName] = actionCreator(modelName, actionName)</span><br><span class="line">  &#125;)</span><br><span class="line">  each(effects, effectName =&gt; &#123;<span class="comment">// 3.把effects放到actions里面</span></span><br><span class="line">    <span class="keyword">if</span> (actions[modelName][effectName]) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`Action name "<span class="subst">$&#123;effectName&#125;</span>" has been used! Please select another name as effect name!`</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    options.addEffect(<span class="string">`<span class="subst">$&#123;modelName&#125;</span><span class="subst">$&#123;SEP&#125;</span><span class="subst">$&#123;effectName&#125;</span>`</span>, effects[effectName])</span><br><span class="line">    <span class="comment">// Effect is like normal action, except it is handled by mirror middleware</span></span><br><span class="line">    <span class="comment">// Effect 像普通的action一样，区别是它会被Mirror的Middleware接收，即createMiddleware方法</span></span><br><span class="line">    actions[modelName][effectName] = actionCreator(modelName, effectName)</span><br><span class="line">    <span class="comment">// Allow packages to differentiate effects from actions</span></span><br><span class="line">    actions[modelName][effectName].isEffect = <span class="literal">true</span></span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 把model里面的reducer转换成map对象</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">resolveReducers</span>(<span class="params">modelName, reducers = &#123;&#125;</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">Object</span>.keys(reducers).reduce(<span class="function">(<span class="params">acc, cur</span>) =&gt;</span> &#123;</span><br><span class="line">    acc[<span class="string">`<span class="subst">$&#123;modelName&#125;</span><span class="subst">$&#123;SEP&#125;</span><span class="subst">$&#123;cur&#125;</span>`</span>] = reducers[cur]</span><br><span class="line">    <span class="keyword">return</span> acc</span><br><span class="line">  &#125;, &#123;&#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 简单封装了遍历对象方法</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">each</span>(<span class="params">obj, callback</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">Object</span>.keys(obj).forEach(callback)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">actionCreator</span>(<span class="params">modelName, actionName</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="params">data</span> =&gt;</span> (</span><br><span class="line">    dispatch(&#123;</span><br><span class="line">      type: <span class="string">`<span class="subst">$&#123;modelName&#125;</span><span class="subst">$&#123;SEP&#125;</span><span class="subst">$&#123;actionName&#125;</span>`</span>,</span><br><span class="line">      data</span><br><span class="line">    &#125;)</span><br><span class="line">  )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="middleware-js"><a href="#middleware-js" class="headerlink" title="middleware.js"></a>middleware.js</h3><p>作用：执行全局范围内的 effects，执行全局的钩子 hooks</p>
+<ol>
+<li>参数为什么叫做 next？next 就是 dispatch</li>
+<li>默认执行其他中间件传递过来的 action</li>
+<li>如果 effects 里面有对应的 actionType，则 effects 里面的 action 优先级更高</li>
+<li>执行钩子里面的函数，并把 action 和 getState 传递给他们<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; effects &#125; <span class="keyword">from</span> <span class="string">'./effects'</span></span><br><span class="line"><span class="keyword">import</span> &#123; hooks &#125; <span class="keyword">from</span> <span class="string">'./hook'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">warning</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(</span><br><span class="line">    <span class="string">'You are calling "dispatch" or "getState" without applying mirrorMiddleware! '</span> +</span><br><span class="line">    <span class="string">'Please create your store with mirrorMiddleware first!'</span></span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">let</span> dispatch = warning</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">let</span> getState = warning</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">createMiddleware</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="params">middlewareAPI</span> =&gt;</span> &#123;</span><br><span class="line">    dispatch = middlewareAPI.dispatch</span><br><span class="line">    getState = middlewareAPI.getState<span class="comment">//getState可以获取redux里面的所有状态</span></span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="params">next</span> =&gt;</span> <span class="function"><span class="params">action</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="comment">//1.next就是dispatch</span></span><br><span class="line">      <span class="keyword">let</span> result = next(action)<span class="comment">//2.默认执行其他中间件传递过来的action</span></span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">typeof</span> effects[action.type] === <span class="string">'function'</span>) &#123;<span class="comment">//3.如果effects里面有对应的action type，则effects里面的action优先级更高</span></span><br><span class="line">        result = effects[action.type](action.data, getState)</span><br><span class="line">      <span class="comment">//执行钩子里面的函数，并把action和getState传递给他们</span></span><br><span class="line">      hooks.forEach(<span class="function"><span class="params">hookFun</span> =&gt;</span> hookFun(action, getState))</span><br><span class="line">      <span class="keyword">return</span> result</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><img src="redux_middlewave.png"></p>
+<h3 id="effects-js"><a href="#effects-js" class="headerlink" title="effects.js"></a>effects.js</h3><p>作用：传值赋值与引用赋值。</p>
+<p>JS 中的类型只有 6 种，其中基本数据类型有 5 种分别为 string，number，boolen，null，undefined。引用类型有一种，就是 object。object 是一个大的综合体。在 JS 中除了那 5 个基本数据类型以外，其他的一切皆对象。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Registry of namespaced effects</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> effects = &#123;&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> addEffect = <span class="function"><span class="params">effects</span> =&gt;</span> <span class="function">(<span class="params">name, handler</span>) =&gt;</span> &#123;</span><br><span class="line">  effects[name] = handler</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="hooks-js"><a href="#hooks-js" class="headerlink" title="hooks.js"></a>hooks.js</h3><p>作用：在全局范围内拦截 action</p>
+<ol>
+<li>用个钩子把函数勾起来</li>
+<li>把钩子一个个拿起来看看</li>
+<li>把第二个钩子删掉</li>
+<li>把钩子一个个拿起来看看</li>
+</ol>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> hooks = []</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="function"><span class="keyword">function</span> <span class="title">hook</span>(<span class="params">subscriber</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">typeof</span> subscriber !== <span class="string">'function'</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Invalid hook, must be a function!'</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  hooks.push(subscriber)</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    hooks.splice(hooks.indexOf(subscriber), <span class="number">1</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ol>
+<li><code>mirror.model({})</code> 这种写法是使用了 js 里面什么设计模式？充分利用了 js 的什么特性？<br>使用了模块模式。充分利用了 js 闭包的特性。</li>
+<li>使用 <code>actions.modelName.increment()</code> 是如何进到这里的？为什么按照 model 这种写法之后，我就可以用 <code>actions.modelName.increment()</code> 去调用 model 里面的方法了。<br>分两种情况，一种是 effects，另外一种是 reducers，两个的触发过程是不一样的。</li>
+<li>model 中的 reducers 和 effects 里面的 function 究竟是 action 还是 reducer？<br>action 里面函数的作用是 dispatch actionType 到 redux 中，而 reducer 里面函数的作用是接收这个 actionType 并返回新的 store 对象。actions.modelName.xxx 通过某种方式进入到了这里，所以这里更像是 saga 的中间层。</li>
+<li>effects 和 reducers 有什么区别？都写到 effects 里面可不可以？effects 和 reducers 都是利用了 js 的什么特性？<br>effects 有经过 middlewave，reducers 没有经过 middlewave。可以是可以，但是不建议这么做。利用了闭包的特性</li>
+<li>reducer 是什么东西？为什么叫做 reducer？reducer 有什么注意事项？<br>reducer 就是一个函数，接收旧的 state 和 action，返回新的 state。之所以称作 reducer 是因为它将被传递给 Array.prototype.reduce(reducer, ?initialValue) 方法。保持 reducer 纯净非常重要。永远不要在 reducer 里做这些操作：修改传入参数；执行有副作用的操作，如 API 请求和路由跳转；调用非纯函数，如 Date.now() 或 Math.random()。</li>
+<li>hook 是怎么实现做到拦截全局 action 的？<br>在需要的地方挂上钩子，在 middlewave 把钩子一个个拿出来执行一遍。</li>
+<li>hooks、effects 中使用的闭包<br>闭包是函数和声明该函数的词法环境的组合。闭包是内部函数在其父函数已经终止之后可以引用其外部封闭函数中存在的变量的一种手段。闭包就是能够读取其他函数内部变量的函数。例如在 javascript 中，只有函数内部的子函数才能读取局部变量，所以闭包可以理解成“定义在一个函数内部的函数”。在本质上，闭包是将函数内部和函数外部连接起来的桥梁。定义在一个函数内部的函数。父函数终止后引用父函数的内部变量。记住这句话：在这个闭包区间内该变量永久有效。</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/MirrorJS/" rel="tag"># MirrorJS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2019/11/06/blog/thinking-in-react/thinking-in-react/" rel="next" title="Thinking in React">
+                <i class="fa fa-chevron-left"></i> Thinking in React
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2020/03/20/blog/thinking-in-javascript/thinking-in-javascript/" rel="prev" title="Javascript设计思想">
+                Javascript设计思想 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">大大白</p>
+              <p class="site-description motion-element" itemprop="description">沉淀下来的东西，才是真正属于自己的财富！</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景介绍"><span class="nav-number">1.</span> <span class="nav-text">背景介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#常规开发"><span class="nav-number">1.1.</span> <span class="nav-text">常规开发</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用MirrorJS"><span class="nav-number">1.2.</span> <span class="nav-text">使用MirrorJS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#思考几个问题"><span class="nav-number">2.</span> <span class="nav-text">思考几个问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#源码解读"><span class="nav-number">3.</span> <span class="nav-text">源码解读</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#model-js"><span class="nav-number">3.1.</span> <span class="nav-text">model.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#actions-js"><span class="nav-number">3.2.</span> <span class="nav-text">actions.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#middleware-js"><span class="nav-number">3.3.</span> <span class="nav-text">middleware.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#effects-js"><span class="nav-number">3.4.</span> <span class="nav-text">effects.js</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hooks-js"><span class="nav-number">3.5.</span> <span class="nav-text">hooks.js</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大大白</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Gemini</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

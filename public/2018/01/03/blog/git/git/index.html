@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在使用Git过程中的一些积累总结。主要有Sourcetree的安装使用、Gerrit基本用法、Submodule的基本用法等。">
+<meta name="keywords" content="Git">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git">
+<meta property="og:url" content="https://ruolong.wang/2018/01/03/blog/git/git/index.html">
+<meta property="og:site_name" content="大大白的个人博客">
+<meta property="og:description" content="在使用Git过程中的一些积累总结。主要有Sourcetree的安装使用、Gerrit基本用法、Submodule的基本用法等。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-09T16:22:04.734Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Git">
+<meta name="twitter:description" content="在使用Git过程中的一些积累总结。主要有Sourcetree的安装使用、Gerrit基本用法、Submodule的基本用法等。">
+
+
+
+
+
+
+  <link rel="canonical" href="https://ruolong.wang/2018/01/03/blog/git/git/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Git | 大大白的个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">大大白的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">人生就像一场旅行，身体和灵魂总有一个要在路上！</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works1">
+    <a href="/blog/works1/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>H5小游戏1</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works2">
+    <a href="/blog/works2/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>H5小游戏2</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-fiction">
+    <a href="/blog/fiction/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>大将军归来</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ruolong.wang/blog/2018/01/03/blog/git/git/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大大白">
+      <meta itemprop="description" content="沉淀下来的东西，才是真正属于自己的财富！">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大大白的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Git
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-01-03 12:00:00" itemprop="dateCreated datePublished" datetime="2018-01-03T12:00:00+08:00">2018-01-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-05-10 00:22:04" itemprop="dateModified" datetime="2020-05-10T00:22:04+08:00">2020-05-10</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/其他/" itemprop="url" rel="index"><span itemprop="name">其他</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/其他/版本管理/" itemprop="url" rel="index"><span itemprop="name">版本管理</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在使用Git过程中的一些积累总结。主要有Sourcetree的安装使用、Gerrit基本用法、Submodule的基本用法等。</p>
+<a id="more"></a>
+<h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p>在Linux安装和使用Git<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">//生成公钥和私钥</span><br><span class="line">ssh-keygen</span><br><span class="line">//公钥添加到github</span><br><span class="line">//私钥添加到本地git</span><br><span class="line">ssh-add ~/.ssh/id_rsa</span><br><span class="line">//如果执行ssh-add时出现Could not open a connection to your authentication agent</span><br><span class="line">//先执行eval</span><br><span class="line">eval `ssh-agent`</span><br><span class="line">//再重新ssh-add就能成功了</span><br><span class="line">ssh-add ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure></p>
+<h2 id="Sourcetree"><a href="#Sourcetree" class="headerlink" title="Sourcetree"></a>Sourcetree</h2><p>git的可视化的图形界面，里面有各种方便的操作。</p>
+<h2 id="Gerrit"><a href="#Gerrit" class="headerlink" title="Gerrit"></a>Gerrit</h2><p>主要用来代码评审。<br>推送<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin HEAD:refs/for/[branch]</span><br></pre></td></tr></table></figure></p>
+<p>遇到no newchange的问题，可以重新commit一次。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git commit --amend</span><br></pre></td></tr></table></figure></p>
+<p>如果还不行，可以回退一个版本再提交。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git reset HEAD~1</span><br></pre></td></tr></table></figure></p>
+<p>遇到没有changeId的问题需要查看git目录下是否有gerrit的hooks</p>
+<h2 id="Submodule"><a href="#Submodule" class="headerlink" title="Submodule"></a>Submodule</h2><h3 id="什么是-Submodule"><a href="#什么是-Submodule" class="headerlink" title="什么是 Submodule"></a>什么是 Submodule</h3><p>有种情况我们经常会遇到：某个工作中的项目需要包含并使用另一个项目。 也许是第三方库，或者你独立开发的，用于多个父项目的库。 现在问题来了：你想要把它们当做两个独立的项目，同时又想在一个项目中使用另一个。<br>Git 通过子模块来解决这个问题。 子模块允许你将一个 Git 仓库作为另一个 Git 仓库的子目录。 它能让你将另一个仓库克隆到自己的项目中，同时还保持提交的独立。</p>
+<h3 id="快速上手-Submodule"><a href="#快速上手-Submodule" class="headerlink" title="快速上手 Submodule"></a>快速上手 Submodule</h3><h4 id="在引用方"><a href="#在引用方" class="headerlink" title="在引用方"></a>在引用方</h4><p>检出项目地址<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone</span><br></pre></td></tr></table></figure></p>
+<p>进入到子目录初始化子模块。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git submodule init</span><br><span class="line">git submodule update</span><br></pre></td></tr></table></figure></p>
+<p>检出分支，拉取代码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git checkout develop</span><br><span class="line">git pull --rebase</span><br></pre></td></tr></table></figure></p>
+<p>主模块会记录子模块的git操作，因此需要在主模块把这个变化做一下提交。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git commit -m &apos;拉取子模块代码&apos;</span><br><span class="line">git push</span><br></pre></td></tr></table></figure></p>
+<h4 id="在提供方"><a href="#在提供方" class="headerlink" title="在提供方"></a>在提供方</h4><p>在提供方按照git的正常操作即可。<br>克隆代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone</span><br></pre></td></tr></table></figure></p>
+<p>提交代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git checkout develop</span><br><span class="line">git commit -m &apos;提交代码&apos;</span><br><span class="line">git push</span><br></pre></td></tr></table></figure></p>
+<h3 id="在主模块加入子模块"><a href="#在主模块加入子模块" class="headerlink" title="在主模块加入子模块"></a>在主模块加入子模块</h3><p>先进入到你想要存放子模块的目录，然后把子模块的 git 仓库加进来。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git submodule add aaa</span><br></pre></td></tr></table></figure></p>
+<p>现在<code>git status</code>会发现，多了一个<code>.gitmodules</code>文件，和一个新的文件夹 xxx<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ git status</span><br><span class="line">On branch feature/submodule</span><br><span class="line">Changes to be committed:</span><br><span class="line">  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)</span><br><span class="line"></span><br><span class="line">        new file:   .gitmodules</span><br><span class="line">        new file:   src/main/js/src/components/xxx</span><br></pre></td></tr></table></figure></p>
+<p><code>.gitmodules</code>文件保存了项目 URL 与已经拉取的本地目录之间的映射，用<code>cat</code>命令可以查看到该文件的具体内容。如果有多个子模块，该文件中就会有多条记录。要重点注意的是，该文件也像<code>.gitignore</code>文件一样受到（通过）版本控制。它会和该项目的其他部分一同被拉取推送。这就是克隆该项目的人知道去哪获得子模块的原因。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cat .gitmodules</span><br><span class="line">[submodule &quot;src/main/js/src/components/xxx&quot;]</span><br><span class="line">        path = src/main/js/src/components/xxx</span><br><span class="line">        url = xxx</span><br><span class="line">        branch = stable</span><br></pre></td></tr></table></figure></p>
+<p><code>path = src/main/js/src/components/xxx</code>，表示是 submodule 的目录，同时它被作为 key 来唯一标识，因为一个项目可能会存在多个 submodule。<br><code>url = xxx</code>，是远程仓库的地址。<br><code>branch = stable</code>，是跟踪的分支，可以设置跟踪分支也可以不设置跟踪分支。这里没有设置所以没有显示。</p>
+<p>特别需要注意的是：默认情况下是没有跟踪分支的。它既不是跟踪 master 也不是跟踪任何分支，他是出于游离状态的 HEAD。那么这种游离状态的分支他要怎么跟新代码呢？你只需要<code>git merge origin/master</code>把 master 的代码合并到自己的游离分支就好了。当前游离的 commitId 和 master 的最新的 commitId 一致，则表示拉取成功！</p>
+<p>虽然<code>xxx</code>是工作目录中的一个子目录，但 Git 还是会将它视作一个子模块。当你不在那个目录中时，Git 并不会跟踪它的内容， 而是将它看作该仓库中的一个特殊提交。</p>
+<p>现在我们已经让<code>aaa</code>和<code>xxx</code>关联在一起了。那么别的小伙伴怎么用呢？</p>
+<h3 id="检出"><a href="#检出" class="headerlink" title="检出"></a>检出</h3><h4 id="检出。根据检出的时机不同分两种情况。"><a href="#检出。根据检出的时机不同分两种情况。" class="headerlink" title="检出。根据检出的时机不同分两种情况。"></a>检出。根据检出的时机不同分两种情况。</h4><p>第一种：在主项目未添加 submodule 的时候已经检出，这时候要获取 submodule 的代码需要如下操作。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git submodule init</span><br><span class="line">git submodule update</span><br></pre></td></tr></table></figure></p>
+<p>第二种：直接重新检出项目，可以用递归检出的方式，把子模块也一起检出。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone --recursive aaa</span><br></pre></td></tr></table></figure></p>
+<h3 id="拉取"><a href="#拉取" class="headerlink" title="拉取"></a>拉取</h3><h4 id="在主模块拉取"><a href="#在主模块拉取" class="headerlink" title="在主模块拉取"></a>在主模块拉取</h4><p><code>git submodule update --remote</code>默认会更新 master 分支的代码，但是它本身又不处于 master 分支。它会更新 master 最新的代码。然后让自己处于游离状态。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git submodule update --remote</span><br></pre></td></tr></table></figure></p>
+<p>如果我们希望它更新我们指定分支的代码可以这样操作。有两种方法可以修改在全局范围内的子项目跟踪的远程分支。<br>第一种：直接修改<code>.gitmodule</code>文件，在最后一行加入<code>branch = stable</code>。例如：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cat .gitmodules</span><br><span class="line">[submodule &quot;src/main/js/src/components/xxx&quot;]</span><br><span class="line">        path = src/main/js/src/components/xxx</span><br><span class="line">        url = xxx</span><br><span class="line">        branch = stable</span><br></pre></td></tr></table></figure></p>
+<p>要特别注意换行和 tab</p>
+<p>第二种：本质上也是和第一种一样，只不过它是用命令行的方式实现的操作。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git config -f .gitmodules submodule.src/main/js/src/components/xxx.branch stable</span><br></pre></td></tr></table></figure></p>
+<p>这里要特别注意<code>src/main/js/src/components/xxx</code>这个我们在 git add submodule 的时候的别名，如果没有设置别名，git 会自动把你的文件目录路径作为别名，也就是 key 保存下来，他在全局是唯一的。</p>
+<p>在查看一下<code>.gitmodules</code>文件发现 branch 已经变了。<br>这时候再<code>git submodule update --remote</code>就会发现子模块的代码已经被关联到 stable 分支了，并且拉取了 stable 分支的最新代码。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ cat .gitmodules</span><br><span class="line">[submodule &quot;src/main/js/src/components/xxx&quot;]</span><br><span class="line">        path = src/main/js/src/components/xxx</span><br><span class="line">        url = xxx</span><br><span class="line">        branch = stable</span><br></pre></td></tr></table></figure></p>
+<h4 id="在子模块拉取"><a href="#在子模块拉取" class="headerlink" title="在子模块拉取"></a>在子模块拉取</h4><p>在项目中使用子模块的最简模型，就是只使用子项目并不时地获取更新，而并不在你的检出中进行任何更改。<br>如果想要在子模块中查看新工作，可以进入到目录中运行<code>git fetch</code>与<code>git merge</code>，合并上游分支来更新本地代码。<br>进入到 submodule 拉取。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd src/main/js/src/components/xxx</span><br><span class="line">git fetch</span><br><span class="line">git merge origin/master</span><br></pre></td></tr></table></figure></p>
+<p>或者也可以<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd src/main/js/src/components/xxx</span><br><span class="line">git checkout stable</span><br><span class="line">git pull --rebase</span><br></pre></td></tr></table></figure></p>
+<p>这个和我们正常使用 git 是一样的。</p>
+<h3 id="推送"><a href="#推送" class="headerlink" title="推送"></a>推送</h3><h4 id="在主模块推送"><a href="#在主模块推送" class="headerlink" title="在主模块推送"></a>在主模块推送</h4><p>这个和平常使用的 git 一样。子模块如果有更改，主模块也要 commit 后 push。</p>
+<h4 id="在子模块推送"><a href="#在子模块推送" class="headerlink" title="在子模块推送"></a>在子模块推送</h4><p>如果我们在主项目中提交并推送但并不推送子模块上的改动，其他尝试检出我们修改的人会遇到麻烦，因为他们无法得到依赖的子模块改动。 那些改动只存在于我们本地的拷贝中。<br>为了确保这不会发生，你可以让 Git 在推送到主项目前检查所有子模块是否已推送。 git push 命令接受可以设置为 “check” 或 “on-demand” 的 –recurse-submodules 参数。 如果任何提交的子模块改动没有推送那么 “check” 选项会直接使 push 操作失败。<br>首先，让我们进入子模块目录然后检出一个分支。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout stable</span><br><span class="line">Switched to branch &apos;stable&apos;</span><br></pre></td></tr></table></figure></p>
+<p>然后在里面修改代码之后<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ git add .</span><br><span class="line">$ git commit -a</span><br><span class="line">$ git push</span><br></pre></td></tr></table></figure></p>
+<p>然后查看一下子目录都是 clean 的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ git status</span><br><span class="line">On branch stable</span><br><span class="line">Your branch is up to date with &apos;origin/stable&apos;.</span><br><span class="line"></span><br><span class="line">nothing to commit, working tree clean</span><br></pre></td></tr></table></figure></p>
+<p>这样我们就在子模块里面把代码提交上去了。<br>然后我们再回到主目录查看一下状态。<br>在主目录会发现还有一个变动，它把子目录的任何变动都视为<code>xxx</code>的变动，你只要把这个文件 commit 上去就可以了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ git status</span><br><span class="line">On branch feature/submodule</span><br><span class="line">Changes not staged for commit:</span><br><span class="line">  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)</span><br><span class="line">  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)</span><br><span class="line">  (commit or discard the untracked or modified content in submodules)</span><br><span class="line"></span><br><span class="line">        modified:   xxx (new commits, modified content)</span><br><span class="line"></span><br><span class="line">no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)</span><br></pre></td></tr></table></figure></p>
+<p>总结来说就是，需要在子目录 push 一次，然后再回到主目录 push 一次。<br>这样操作变得很繁琐，而且有时候在子目录提交了会忘记在主目录再提交一次，会造成没必要的误会。<br>我们可以设置 push 的<code>--recurse-submodules</code>参数，它有两个值，一个是 check 另一个是 on-demand。check 是在你 push 的时候检查子目录是不是还有没提交的，如果还有没提交的你要手动到子目录提交。而 on-demand 则是直接进入子目录自动帮你提交。让我们来试一下这两种操作。</p>
+<p>当我们在子目录修改完后 commit，然后主目录的<code>xxx</code>会显示修改，我们这时候把主目录的修改也 commit，那么就剩最后一步 push 了。这时候加上参数，他会提示我们：子目录的文件还没有 push，你可以用 on-demand 这个参数，或者手动 cd 进去 push 之后再回来主目录 push</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">$ git push --recurse-submodules=check</span><br><span class="line">The following submodule paths contain changes that can</span><br><span class="line">not be found on any remote:</span><br><span class="line">src/main/js/src/components/xxx</span><br><span class="line"></span><br><span class="line">Please try</span><br><span class="line"></span><br><span class="line">        git push --recurse-submodules=on-demand</span><br><span class="line"></span><br><span class="line">or cd to the path and use</span><br><span class="line"></span><br><span class="line">        git push</span><br><span class="line"></span><br><span class="line">to push them to a remote.</span><br></pre></td></tr></table></figure>
+<p>然后我们尝试用 on-demand，但是居然报错了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git push --recurse-submodules=on-demand</span><br><span class="line">fatal: src refspec &apos;refs/heads/feature/submodule&apos; must name a ref</span><br></pre></td></tr></table></figure></p>
+<p>这是因为我们用了 gerrit。</p>
+<h3 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h3><h4 id="git-submodule-的时候报错"><a href="#git-submodule-的时候报错" class="headerlink" title="git submodule 的时候报错"></a>git submodule 的时候报错</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">A git directory for &apos;src/main/js/src/components/xxx&apos; is found locally with remote(s):</span><br><span class="line">  origin        xxx</span><br><span class="line">If you want to reuse this local git directory instead of cloning again from</span><br><span class="line">  xxx</span><br><span class="line">use the &apos;--force&apos; option. If the local git directory is not the correct repo</span><br><span class="line">or you are unsure what this means choose another name with the &apos;--name&apos; option.</span><br></pre></td></tr></table></figure>
+<p>意思是这个名字已经被占用需要换一个，或者直接删除.git/modules 下面的所有文件。</p>
+<h4 id="克隆含有子模块的项目"><a href="#克隆含有子模块的项目" class="headerlink" title="克隆含有子模块的项目"></a>克隆含有子模块的项目</h4><p>方法一：进入到子模块的目录后<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git submodule init</span><br><span class="line">git submodule update</span><br></pre></td></tr></table></figure></p>
+<p>方法二：直接重新检出项目<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone --recursive aaa</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Git/" rel="tag"># Git</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2017/11/03/blog/front-end-performance/front-end-performance/" rel="next" title="前端性能优化">
+                <i class="fa fa-chevron-left"></i> 前端性能优化
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/03/01/blog/auto-build/auto-build/" rel="prev" title="前端后端一体化自动构建">
+                前端后端一体化自动构建 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">大大白</p>
+              <p class="site-description motion-element" itemprop="description">沉淀下来的东西，才是真正属于自己的财富！</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Git"><span class="nav-number">1.</span> <span class="nav-text">Git</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sourcetree"><span class="nav-number">2.</span> <span class="nav-text">Sourcetree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Gerrit"><span class="nav-number">3.</span> <span class="nav-text">Gerrit</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Submodule"><span class="nav-number">4.</span> <span class="nav-text">Submodule</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是-Submodule"><span class="nav-number">4.1.</span> <span class="nav-text">什么是 Submodule</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速上手-Submodule"><span class="nav-number">4.2.</span> <span class="nav-text">快速上手 Submodule</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在引用方"><span class="nav-number">4.2.1.</span> <span class="nav-text">在引用方</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在提供方"><span class="nav-number">4.2.2.</span> <span class="nav-text">在提供方</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在主模块加入子模块"><span class="nav-number">4.3.</span> <span class="nav-text">在主模块加入子模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#检出"><span class="nav-number">4.4.</span> <span class="nav-text">检出</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#检出。根据检出的时机不同分两种情况。"><span class="nav-number">4.4.1.</span> <span class="nav-text">检出。根据检出的时机不同分两种情况。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#拉取"><span class="nav-number">4.5.</span> <span class="nav-text">拉取</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在主模块拉取"><span class="nav-number">4.5.1.</span> <span class="nav-text">在主模块拉取</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在子模块拉取"><span class="nav-number">4.5.2.</span> <span class="nav-text">在子模块拉取</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#推送"><span class="nav-number">4.6.</span> <span class="nav-text">推送</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在主模块推送"><span class="nav-number">4.6.1.</span> <span class="nav-text">在主模块推送</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在子模块推送"><span class="nav-number">4.6.2.</span> <span class="nav-text">在子模块推送</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#遇到的问题"><span class="nav-number">4.7.</span> <span class="nav-text">遇到的问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#git-submodule-的时候报错"><span class="nav-number">4.7.1.</span> <span class="nav-text">git submodule 的时候报错</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#克隆含有子模块的项目"><span class="nav-number">4.7.2.</span> <span class="nav-text">克隆含有子模块的项目</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大大白</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Gemini</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

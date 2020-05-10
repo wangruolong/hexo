@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前端性能优化。记录了自己对前端优化的一些经验和理解。">
+<meta name="keywords" content="性能优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端性能优化">
+<meta property="og:url" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/index.html">
+<meta property="og:site_name" content="大大白的个人博客">
+<meta property="og:description" content="前端性能优化。记录了自己对前端优化的一些经验和理解。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/async和defer.jpg">
+<meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/async和defer.png">
+<meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/getBoundingClientRect.png">
+<meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/compatibilityDesktop.png">
+<meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/compatibilityMobile.png">
+<meta property="og:updated_time" content="2020-04-18T14:48:14.219Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端性能优化">
+<meta name="twitter:description" content="前端性能优化。记录了自己对前端优化的一些经验和理解。">
+<meta name="twitter:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/async和defer.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>前端性能优化 | 大大白的个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">大大白的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">人生就像一场旅行，身体和灵魂总有一个要在路上！</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works1">
+    <a href="/blog/works1/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>H5小游戏1</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works2">
+    <a href="/blog/works2/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>H5小游戏2</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-fiction">
+    <a href="/blog/fiction/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>大将军归来</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ruolong.wang/blog/2017/11/03/blog/front-end-performance/front-end-performance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大大白">
+      <meta itemprop="description" content="沉淀下来的东西，才是真正属于自己的财富！">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大大白的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">前端性能优化
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2017-11-03 12:00:00" itemprop="dateCreated datePublished" datetime="2017-11-03T12:00:00+08:00">2017-11-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-04-18 22:48:14" itemprop="dateModified" datetime="2020-04-18T22:48:14+08:00">2020-04-18</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/" itemprop="url" rel="index"><span itemprop="name">WEB前端</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/性能优化/" itemprop="url" rel="index"><span itemprop="name">性能优化</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前端性能优化。记录了自己对前端优化的一些经验和理解。</p>
+<a id="more"></a>
+<h2 id="Webpack优化"><a href="#Webpack优化" class="headerlink" title="Webpack优化"></a>Webpack优化</h2><p>资源压缩与合并<br>html压缩。<br>css压缩。MiniCssExtractPlugin<br>js压缩。UglifyJSPlugin<br>文件合并和拆分。合并业务代码文件，拆分公共库文件，避免缓存失效。</p>
+<p>图片相关的优化<br>压缩图片。在线压缩<br>雪碧图。SpritesmithPlugin<br>image inline<br>url-loader和file-loader来配合使用。构建工具通过url-loader来优化项目中对于资源的引用路径，并设定大小限制，当资源的体积小于limit时将其直接进行Base64转换后嵌入引用文件，体积大于limit时可通过fallback参数指定的loader进行处理。<br>预加载。先用一张极小的图片来代替，等到内容加载完了，再向服务器请求真正的图片并替换，可以有效的减少等待时间。</p>
+<h3 id="分离应用程序-app-和第三方库-vendor"><a href="#分离应用程序-app-和第三方库-vendor" class="headerlink" title="分离应用程序(app)和第三方库(vendor)"></a>分离应用程序(app)和第三方库(vendor)</h3><p>避免缓存大面积失效<br><code>venders</code>用来打包第三方库。但是如果只是配置这个，<code>app.js</code>并没有变小，因为这个配置只是新打包了一个<code>venders.js</code>文件，本身和<code>app.js</code>没什么关联。<br><code>venders</code>必须要配合<code>optimization.splitChunks</code>才能实现对<code>app.js</code>里面第三方库的分离。<br><code>optimization.splitChunks</code>用来剥离充重复引用的包。简单来说就是把<code>app.js</code>和<code>venders.js</code>里面共同引用的包分离出来到<code>common.js</code>，然后在<code>app.js</code>和<code>venders.js</code>留下一个require入口指向<code>common.js</code>。举个例子：<code>index.js</code>中有<code>a.js</code>和<code>b.js</code>，然后<code>a.js</code>引入了<code>xxx.js</code>，<code>b.js</code>也引入了<code>xxx.js</code>。这样如果直接打包<code>xxx.js</code>就会被打包两次，所以通过<code>optimization.splitChunks</code>的配置， <code>xxx.js</code>被抽取出来打包到了<code>common.js</code>里面，而原来<code>a.js</code>和<code>b.js</code>的<code>import</code>地方只留下了一个require入口指向<code>common.js</code><br>这样通过<code>venders</code>和<code>optimization.splitChunks</code>的配合就能把一个比较大的<code>app.js</code>文件变成<code>app.js</code>、<code>venders.js</code>、<code>common.js</code>这几个比较小的文件。<br>需要特别注意的是如果<code>venders</code>里面有，但是<code>app</code>却没有，那么这样<code>splitChunks</code>就不会生效，最终的结果就是导致<code>venders</code>变大。比如在<code>app</code>里面是<code>import uniqBy from &#39;lodash/uniqBy&#39;</code>但是在<code>venders</code>里面直接配置<code>venders:[&#39;lodash&#39;]</code>这样的做其实是直接<code>import from &#39;lodash&#39;</code>，<code>app.js</code>里面并不是这样引入的它只是引入了lodash其中某个方法，那么<code>splitChunks</code>会认为这两个包没有重复。最终的结果就是打包了<code>lodash/uniqBy</code>然后也打包了<code>lodash</code>。<br>还有，像<code>redux-devtools-dock-monitor</code>这种包也是最好不要放入<code>venders</code>，因为一般情况下<code>redux-devtools-dock-monitor</code>这个只会在开发环境下使用，正式发布的时候一般都会去掉。这样子正式环境在使用的时候，由于<code>splitChunks</code>在<code>app.js</code>里面没有找到<code>redux-devtools-dock-monitor</code>导致<code>venders.js</code>里面多打了这个包进来。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  entry: &#123;</span><br><span class="line">		app: <span class="string">'./src/index.js'</span>,</span><br><span class="line">		venders:[<span class="string">'react-dom'</span>,<span class="string">'iconv-lite'</span>,<span class="string">'immutable'</span>,<span class="string">'moment'</span>,<span class="string">'crypto-js'</span>]</span><br><span class="line">	&#125;,</span><br><span class="line">  optimization: &#123;</span><br><span class="line">    splitChunks: &#123;</span><br><span class="line">      cacheGroups: &#123;</span><br><span class="line">        commons: &#123;</span><br><span class="line">          name: <span class="string">'vender'</span>,</span><br><span class="line">          chunks: <span class="string">'initial'</span>,</span><br><span class="line">          minChunks: <span class="number">2</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="SplitChunks"><a href="#SplitChunks" class="headerlink" title="SplitChunks"></a>SplitChunks</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  optimization: &#123;</span><br><span class="line">    splitChunks: &#123;</span><br><span class="line">      chunks: <span class="string">"all"</span>,   <span class="comment">// 共有3个值"initial"，"async"和"all"。配置后，代码分割优化仅选择初始块（同步），按需块（异步）或所有块（同步和异步）</span></span><br><span class="line">      minSize: <span class="number">30000</span>,   <span class="comment">// （默认值：30000）块的最小大小，文件大于30kb才进行分割</span></span><br><span class="line">      minChunks: <span class="number">1</span>,    <span class="comment">// （默认值：1）在拆分之前共享模块的最小块数，模块至少使用次数。</span></span><br><span class="line">      maxAsyncRequests: <span class="number">5</span>,   <span class="comment">//（默认为5）按需加载时并行请求的最大数量</span></span><br><span class="line">      maxInitialRequests: <span class="number">3</span>,  <span class="comment">//（默认值为3）入口点的最大并行请求数</span></span><br><span class="line">      automaticNameDelimiter: <span class="string">'~'</span>,  <span class="comment">// 默认情况下，webpack将使用块的来源和名称生成名称，例如vendors~main.js</span></span><br><span class="line">      name: <span class="literal">true</span>,</span><br><span class="line">      cacheGroups: &#123;  <span class="comment">// 以上条件都满足后会走入cacheGroups进一步进行优化的判断</span></span><br><span class="line">          vendors: &#123;</span><br><span class="line">              test: <span class="regexp">/[\\/]node_modules[\\/]/</span>,  <span class="comment">// 判断引入库是否是node_modules里的</span></span><br><span class="line">              priority: <span class="number">-10</span>,   <span class="comment">// 数字越大优先级越高 （-10大于-20）</span></span><br><span class="line">              filename: <span class="string">'vendors.js'</span>,  <span class="comment">// 设置代码分割后的文件名vendors.js</span></span><br><span class="line">              name:<span class="string">'vendors'</span>,<span class="comment">//这个和filename的区别是文件名vendors.xxxxx.js</span></span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="keyword">default</span>: &#123;   <span class="comment">//所有代码分割快都符合默认值，此时判断priority优先级</span></span><br><span class="line">              minChunks: <span class="number">2</span>,  </span><br><span class="line">              priority: <span class="number">-20</span>,</span><br><span class="line">              reuseExistingChunk: <span class="literal">true</span>   <span class="comment">// 允许在模块完全匹配时重用现有的块，而不是创建新的块。</span></span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="HMR"><a href="#HMR" class="headerlink" title="HMR"></a>HMR</h3><p>模块热替换(Hot Module Replacement 或 HMR)是 webpack 提供的最有用的功能之一。它允许在运行时更新各种模块，而无需进行完全刷新。<br><a href="https://www.webpackjs.com/concepts/hot-module-replacement/" target="_blank" rel="noopener">https://www.webpackjs.com/concepts/hot-module-replacement/</a></p>
+<h3 id="Tree-Shaking"><a href="#Tree-Shaking" class="headerlink" title="Tree Shaking"></a>Tree Shaking</h3><p>tree shaking 是一个术语，通常用于描述移除JavaScript 上下文中的未引用代码(dead-code)。<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"name"</span>: <span class="string">"your-project"</span>,</span><br><span class="line">  <span class="attr">"sideEffects"</span>: [<span class="comment">//需要被排除在外的，就算有无用代码也不会去掉，一样会被编译进去。</span></span><br><span class="line">    <span class="string">"./src/some-side-effectful-file.js"</span>,</span><br><span class="line">    <span class="string">"*.css"</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="Shimming-全局变量"><a href="#Shimming-全局变量" class="headerlink" title="Shimming 全局变量"></a>Shimming 全局变量</h3><p>webpack 编译器(compiler)能够识别遵循 ES2015 模块语法、CommonJS 或 AMD 规范编写的模块。然而，一些第三方的库(library)可能会引用一些全局依赖（例如 jQuery 中的 $）。这些库也可能创建一些需要被导出的全局变量。这些“不符合规范的模块”就是 shimming 发挥作用的地方。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">plugins: [</span><br><span class="line">        <span class="keyword">new</span> webpack.ProvidePlugin(&#123;</span><br><span class="line">            <span class="comment">// _: 'lodash',//把lodash赋予全局变量_</span></span><br><span class="line">            join: [<span class="string">'lodash'</span>, <span class="string">'join'</span>]<span class="comment">//把lodash.join赋予全局变量join</span></span><br><span class="line">        &#125;)</span><br><span class="line">    ],</span><br></pre></td></tr></table></figure></p>
+<h3 id="抽取CSS"><a href="#抽取CSS" class="headerlink" title="抽取CSS"></a>抽取CSS</h3><p>它会将所有的入口 chunk(entry chunks)中引用的 *.css，移动到独立分离的 CSS 文件。因此，你的样式将不再内嵌到 JS bundle 中，而是会放到一个单独的 CSS 文件（即 styles.css）当中。 如果你的样式文件大小较大，这会做更快提前加载，因为 CSS bundle 会跟 JS bundle 并行加载。<br><a href="https://github.com/webpack-contrib/mini-css-extract-plugin" target="_blank" rel="noopener">https://github.com/webpack-contrib/mini-css-extract-plugin</a><br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> MiniCssExtractPlugin = <span class="built_in">require</span>(<span class="string">"mini-css-extract-plugin"</span>);</span><br><span class="line"><span class="keyword">const</span> devMode = process.env.NODE_ENV !== <span class="string">'production'</span></span><br><span class="line"><span class="built_in">module</span>.exports = &#123;</span><br><span class="line">  plugins: [</span><br><span class="line">    <span class="keyword">new</span> MiniCssExtractPlugin(&#123;</span><br><span class="line">      <span class="comment">// Options similar to the same options in webpackOptions.output</span></span><br><span class="line">      <span class="comment">// both options are optional</span></span><br><span class="line">      filename: devMode ? <span class="string">'[name].css'</span> : <span class="string">'[name].[hash].css'</span>,</span><br><span class="line">      chunkFilename: devMode ? <span class="string">'[id].css'</span> : <span class="string">'[id].[hash].css'</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">  ],</span><br><span class="line">  <span class="built_in">module</span>: &#123;</span><br><span class="line">    rules: [</span><br><span class="line">      &#123;</span><br><span class="line">        test: <span class="regexp">/\.(sa|sc|c)ss$/</span>,</span><br><span class="line">        use: [</span><br><span class="line">          devMode ? <span class="string">'style-loader'</span> : MiniCssExtractPlugin.loader,</span><br><span class="line">          <span class="string">'css-loader'</span>,</span><br><span class="line">          <span class="string">'postcss-loader'</span>,</span><br><span class="line">          <span class="string">'sass-loader'</span>,</span><br><span class="line">        ],</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h3 id="注意import用法，减少没必要的包。"><a href="#注意import用法，减少没必要的包。" class="headerlink" title="注意import用法，减少没必要的包。"></a>注意import用法，减少没必要的包。</h3><ul>
+<li><code>import uniqBy from &#39;lodash/uniqBy&#39;</code>：只引入了lodash里面的uniqBy方法。</li>
+<li><code>import { uniqBy} from &#39;lodash&#39;</code>：先把lodash整个对象引入后，再引入uniqBy方法。<br>最好是第一种不用引入lodash整个对象，只要把相关的函数引入就可以，这样体积可以小很多。</li>
+</ul>
+<h2 id="css和js的装载与执行"><a href="#css和js的装载与执行" class="headerlink" title="css和js的装载与执行"></a>css和js的装载与执行</h2><p>基本原理<br>先拿到html文档。然后从上往下，一步一步生成DOM树。包括<code>&lt;link /&gt;&lt;script /&gt;</code>所有标签。DOM树和CSS树都有之后，进行合并，才会渲染。</p>
+<p>css阻塞和渲染<br>要把css放在head标签里面，置顶。因为css、js资源并发加载在chrome底下，对一个域名，一次最多同时请求6个。如果css不置顶会先请求js。<br>如果css不置顶，dom先渲染了，但是css还没渲染，这样会有样式跳变。<br>css会阻塞后面的js的执行。<br>js 默认引入方式，会阻塞页面渲染，先加载js文件再加载页面<br>js defer异步，不会阻塞页面的渲染，保证  执行顺序，脚本之间可以有顺序关系。会等dom渲染完再执行。<br>js async同步，不会阻塞页面的渲染，不保证执行顺序，脚本之间不能有顺序关系。不会等dom渲染完执行，都不一定谁先谁后。</p>
+<p>defer和async<br>先来试个一句话解释仨，当浏览器碰到 script 脚本的时候：</p>
+<p><script src="script.js"></script><br>没有 defer 或 async，浏览器会立即加载并执行指定的脚本，“立即”指的是在渲染该 script 标签之下的文档元素之前，也就是说不等待后续载入的文档元素，读到就加载并执行。</p>
+<p><script async src="script.js"></script><br>有 async，加载和渲染后续文档元素的过程将和 script.js 的加载与执行并行进行（异步）。</p>
+<p><script defer src="myscript.js"></script><br>有 defer，加载后续文档元素的过程将和 script.js 的加载并行进行（异步），但是 script.js 的执行要在所有元素解析完成之后，DOMContentLoaded 事件触发之前完成。<br>然后从实用角度来说呢，首先把所有脚本都丢到  之前是最佳实践，因为对于旧浏览器来说这是唯一的优化选择，此法可保证非脚本的其他一切元素能够以最快的速度得到加载和解析。<br>接着，我们来看一张图咯：<br><img src="async和defer.jpg"><br><img src="async和defer.png"><br>蓝色线代表网络读取，红色线代表执行时间，这俩都是针对脚本的；绿色线代表 HTML 解析。<br>此图告诉我们以下几个要点：</p>
+<ul>
+<li>defer 和 async 在网络读取（下载）这块儿是一样的，都是异步的（相较于 HTML 解析）</li>
+<li>它俩的差别在于脚本下载完之后何时执行，显然 defer 是最接近我们对于应用脚本加载和执行的要求的</li>
+<li>关于 defer，此图未尽之处在于它是按照加载顺序执行脚本的，这一点要善加利用</li>
+<li>async 则是一个乱序执行的主，反正对它来说脚本的加载和执行是紧紧挨着的，所以不管你声明的顺序如何，只要它加载完了就会立刻执行</li>
+<li>仔细想想，async 对于应用脚本的用处不大，因为它完全不考虑依赖（哪怕是最低级的顺序执行），不过它对于那些可以不依赖任何脚本或不被任何脚本依赖的脚本来说却是非常合适的，最典型的例子：Google Analytics</li>
+</ul>
+<h2 id="懒加载和预加载"><a href="#懒加载和预加载" class="headerlink" title="懒加载和预加载"></a>懒加载和预加载</h2><p>懒加载或者按需加载，是一种很好的优化网页或应用的方式。这种方式实际上是先把你的代码在一些逻辑断点处分离开，然后在一些代码块中完成某些操作后，立即引用或即将引用另外一些新的代码块。这样加快了应用的初始加载速度，减轻了它的总体体积，因为某些代码块可能永远不会被加载。</p>
+<h3 id="路由懒加载"><a href="#路由懒加载" class="headerlink" title="路由懒加载"></a>路由懒加载</h3><p>使用react-loadable实现路由延迟加载，加快首屏载入速度。</p>
+<p>组件级别的代码分隔 react-loadable<br>使用React.lazy() 等待组件加载的时候 暂停渲染<br>PureComponent纯组件<br>在传入props的时候，仅仅比较浅层的数据变化，深层数据属性变化组件不会更新<br>深层数据的更新可以通过判断，强行触发组件更新适用场景：组件的state、props相同的情况下，组件的表现应该保持不变，则可以使用React.PureComponent提升性能</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> loadable <span class="keyword">from</span> <span class="string">'react-loadable'</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">asyncLoader</span>(<span class="params">modulePath</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> LoadableComponent = loadable(&#123;</span><br><span class="line">    loader: <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">import</span>(<span class="string">`../<span class="subst">$&#123;modulePath&#125;</span>`</span>),</span><br><span class="line">    loading: <span class="function">(<span class="params">&#123; isLoading, error &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (isLoading) &#123;</span><br><span class="line">        <span class="keyword">return</span> &lt;Loading /&gt;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (error) &#123;</span><br><span class="line">        <span class="keyword">return</span> &lt;Error /&gt;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">LoadableDashboard</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;LoadableComponent /&gt;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="图片懒加载"><a href="#图片懒加载" class="headerlink" title="图片懒加载"></a>图片懒加载</h3><p>getBoundingClientRect用于获取某个元素相对于视窗的位置集合。集合中有top, right, bottom, left等属性。<code>rectObject = object.getBoundingClientRect();</code>rectObject.top：元素上边到视窗上边的距离;rectObject.right：元素右边到视窗左边的距离;rectObject.bottom：元素下边到视窗上边的距离;rectObject.left：元素左边到视窗左边的距离;rectObject.width：元素的宽度;rectObject.height：元素的高度;<br><img src="getBoundingClientRect.png"><br><img src="compatibilityDesktop.png"><br><img src="compatibilityMobile.png"><br>通过监听scroll实践，判断rectObject.top是否到达可视区域高度clientHeight，等到达了再把原来藏在img里面的dataUrl放到src里面，让img请求加载图片。</p>
+<h3 id="图片预加载"><a href="#图片预加载" class="headerlink" title="图片预加载"></a>图片预加载</h3><p>用<code>&lt;img/&gt;</code>事先加载<br>用<code>Image img = new Image()</code>来创建<br>用xmlhttprequest请求的时候把图片打开，让浏览器缓存住这张图片。这种做法会比较精确的控制什么时候需要预加载。但是要特别注意跨域问题。</p>
+<h2 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h2><p>用chrome的memory监测是否有内存泄漏</p>
+<h3 id="下面以-WeakMap-为例，看看它是怎么解决内存泄漏的。"><a href="#下面以-WeakMap-为例，看看它是怎么解决内存泄漏的。" class="headerlink" title="下面以 WeakMap 为例，看看它是怎么解决内存泄漏的。"></a>下面以 WeakMap 为例，看看它是怎么解决内存泄漏的。</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> wm = <span class="keyword">new</span> <span class="built_in">WeakMap</span>();</span><br><span class="line"><span class="keyword">const</span> element = <span class="built_in">document</span>.getElementById(<span class="string">'example'</span>);</span><br><span class="line">wm.set(element, <span class="string">'some information'</span>);</span><br><span class="line">wm.get(element) <span class="comment">// "some information"</span></span><br></pre></td></tr></table></figure>
+<p>上面代码中，先新建一个 Weakmap 实例。然后，将一个 DOM 节点作为键名存入该实例，并将一些附加信息作为键值，一起存放在 WeakMap 里面。这时，WeakMap 里面对element的引用就是弱引用，不会被计入垃圾回收机制。<br>也就是说，DOM 节点对象的引用计数是1，而不是2。这时，一旦消除对该节点的引用，它占用的内存就会被垃圾回收机制释放。Weakmap 保存的这个键值对，也会自动消失。<br>基本上，如果你要往对象上添加数据，又不想干扰垃圾回收机制，就可以使用 WeakMap。</p>
+<h2 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h2><p>用chrome的performance</p>
+<h2 id="重绘与回流"><a href="#重绘与回流" class="headerlink" title="重绘与回流"></a>重绘与回流</h2><p>回流必定触发重绘，而重绘不一定触发回流。</p>
+<h2 id="浏览器存储cookies-localstorage-sessionstorage-indexedDB"><a href="#浏览器存储cookies-localstorage-sessionstorage-indexedDB" class="headerlink" title="浏览器存储cookies localstorage sessionstorage indexedDB"></a>浏览器存储cookies localstorage sessionstorage indexedDB</h2><h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2>
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/性能优化/" rel="tag"># 性能优化</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2017/11/03/blog/basic-knowledge/basic-knowledge/" rel="next" title="前端基础技能">
+                <i class="fa fa-chevron-left"></i> 前端基础技能
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/01/03/blog/git/git/" rel="prev" title="Git">
+                Git <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">大大白</p>
+              <p class="site-description motion-element" itemprop="description">沉淀下来的东西，才是真正属于自己的财富！</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Webpack优化"><span class="nav-number">1.</span> <span class="nav-text">Webpack优化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#分离应用程序-app-和第三方库-vendor"><span class="nav-number">1.1.</span> <span class="nav-text">分离应用程序(app)和第三方库(vendor)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SplitChunks"><span class="nav-number">1.2.</span> <span class="nav-text">SplitChunks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HMR"><span class="nav-number">1.3.</span> <span class="nav-text">HMR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tree-Shaking"><span class="nav-number">1.4.</span> <span class="nav-text">Tree Shaking</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Shimming-全局变量"><span class="nav-number">1.5.</span> <span class="nav-text">Shimming 全局变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#抽取CSS"><span class="nav-number">1.6.</span> <span class="nav-text">抽取CSS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注意import用法，减少没必要的包。"><span class="nav-number">1.7.</span> <span class="nav-text">注意import用法，减少没必要的包。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#css和js的装载与执行"><span class="nav-number">2.</span> <span class="nav-text">css和js的装载与执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#懒加载和预加载"><span class="nav-number">3.</span> <span class="nav-text">懒加载和预加载</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#路由懒加载"><span class="nav-number">3.1.</span> <span class="nav-text">路由懒加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图片懒加载"><span class="nav-number">3.2.</span> <span class="nav-text">图片懒加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图片预加载"><span class="nav-number">3.3.</span> <span class="nav-text">图片预加载</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存泄漏"><span class="nav-number">4.</span> <span class="nav-text">内存泄漏</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#下面以-WeakMap-为例，看看它是怎么解决内存泄漏的。"><span class="nav-number">4.1.</span> <span class="nav-text">下面以 WeakMap 为例，看看它是怎么解决内存泄漏的。</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能分析"><span class="nav-number">5.</span> <span class="nav-text">性能分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重绘与回流"><span class="nav-number">6.</span> <span class="nav-text">重绘与回流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#浏览器存储cookies-localstorage-sessionstorage-indexedDB"><span class="nav-number">7.</span> <span class="nav-text">浏览器存储cookies localstorage sessionstorage indexedDB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#缓存"><span class="nav-number">8.</span> <span class="nav-text">缓存</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大大白</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Gemini</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

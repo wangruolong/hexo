@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本文介绍的表单引擎是一个采用了单向数据流，双向数据绑定，三大事件机制，四大核心驱动，打通五脏六腑七经八脉，按照九大设计模式为指导思想的十全十美的表单引擎。本文将带你走进表单引擎的世界，为你阐述其设计思想，让你领悟其设计精髓！">
+<meta name="keywords" content="表单引擎">
+<meta property="og:type" content="article">
+<meta property="og:title" content="表单引擎设计思想">
+<meta property="og:url" content="https://ruolong.wang/2018/06/28/blog/thinking-in-form-engine/thinking-in-form-engine/index.html">
+<meta property="og:site_name" content="大大白的个人博客">
+<meta property="og:description" content="本文介绍的表单引擎是一个采用了单向数据流，双向数据绑定，三大事件机制，四大核心驱动，打通五脏六腑七经八脉，按照九大设计模式为指导思想的十全十美的表单引擎。本文将带你走进表单引擎的世界，为你阐述其设计思想，让你领悟其设计精髓！">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-09T16:15:12.039Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="表单引擎设计思想">
+<meta name="twitter:description" content="本文介绍的表单引擎是一个采用了单向数据流，双向数据绑定，三大事件机制，四大核心驱动，打通五脏六腑七经八脉，按照九大设计模式为指导思想的十全十美的表单引擎。本文将带你走进表单引擎的世界，为你阐述其设计思想，让你领悟其设计精髓！">
+
+
+
+
+
+
+  <link rel="canonical" href="https://ruolong.wang/2018/06/28/blog/thinking-in-form-engine/thinking-in-form-engine/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>表单引擎设计思想 | 大大白的个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">大大白的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">人生就像一场旅行，身体和灵魂总有一个要在路上！</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works1">
+    <a href="/blog/works1/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>H5小游戏1</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works2">
+    <a href="/blog/works2/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>H5小游戏2</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-fiction">
+    <a href="/blog/fiction/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>大将军归来</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ruolong.wang/blog/2018/06/28/blog/thinking-in-form-engine/thinking-in-form-engine/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大大白">
+      <meta itemprop="description" content="沉淀下来的东西，才是真正属于自己的财富！">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大大白的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">表单引擎设计思想
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-06-28 16:48:00" itemprop="dateCreated datePublished" datetime="2018-06-28T16:48:00+08:00">2018-06-28</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-05-10 00:15:12" itemprop="dateModified" datetime="2020-05-10T00:15:12+08:00">2020-05-10</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/" itemprop="url" rel="index"><span itemprop="name">WEB前端</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/设计思想/" itemprop="url" rel="index"><span itemprop="name">设计思想</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文介绍的表单引擎是一个采用了单向数据流，双向数据绑定，三大事件机制，四大核心驱动，打通五脏六腑七经八脉，按照九大设计模式为指导思想的十全十美的表单引擎。本文将带你走进表单引擎的世界，为你阐述其设计思想，让你领悟其设计精髓！<br><a id="more"></a></p>
+<h2 id="设计思想"><a href="#设计思想" class="headerlink" title="设计思想"></a>设计思想</h2><p>根据配置信息生成表单。配置信息配置了表单的布局样式，交互方式，以及关联关系。<br>根据配置信息在组件库中找到对应的组件，在运行时进行实例化。<br>借鉴spring的思想通过控制反转的方式将组件都放在context中管理。组件之间如果需要通信可以通过引擎触发，引擎充当一个中介者的角色来处理这些信息。<br>一些装饰器可以增强组件的能力。<br>容器组件事先定义好了子组件的布局方式。</p>
+<h3 id="控制反转（Inversion-of-Control）"><a href="#控制反转（Inversion-of-Control）" class="headerlink" title="控制反转（Inversion of Control）"></a>控制反转（Inversion of Control）</h3><p>表单引擎将组件<code>component</code>注入到<code>IoC</code>容器里面，并通过组件的<code>key</code>进行查找。这里使用了<code>依赖注入（Dependency Injection）</code>和<code>依赖查找（Dependency Lookup）</code>的思想。并通过单例模式的方式让组件在容器中保持唯一。<br>依赖注入和依赖查找是控制反转（Inversion of Control，缩写为IoC）的重要思想，简单来说就是把原来自己的控制权限转交给别人。<br>依赖注入（Dependency Injection）：将组件注入到容器。<br>依赖查找（Dependency Lookup）：在容器中找到组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IoC</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>() &#123;</span><br><span class="line">        <span class="keyword">this</span>.context = &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> getInstance() &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>.instance) &#123;</span><br><span class="line">            <span class="keyword">this</span>.instance = <span class="keyword">new</span> IoC()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.instance</span><br><span class="line">    &#125;</span><br><span class="line">    injection(key, component) &#123;</span><br><span class="line">        <span class="keyword">this</span>.context[key] = component</span><br><span class="line">    &#125;</span><br><span class="line">    lookup(key) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.context[key]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="面向切面（Aspect-Oriented-Programming）"><a href="#面向切面（Aspect-Oriented-Programming）" class="headerlink" title="面向切面（Aspect-Oriented Programming）"></a>面向切面（Aspect-Oriented Programming）</h3><p>表单引擎在预编译的时候把<code>this._onChange</code>与<code>this._aop</code>绑定在一起，在<code>onChange</code>运行时的时候才真正去出发<code>this._aop</code>中的方法。<br>面向切面编程，通过预编译方式和运行期动态代理实现程序功能的统一维护的一种技术。<br>预编译（precompile）：编译时把当前的方法放入AOP中。<br>运行时（runtime）：运行时AOP中会动态的把需要的方法织入。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;RadioGroup options=&#123;options&#125;</span><br><span class="line">            onChange=&#123;<span class="keyword">this</span>._aop.bindArgs(<span class="keyword">this</span>._onChange, <span class="keyword">this</span>, &#123; <span class="attr">target</span>: &#123; <span class="attr">value</span>: !<span class="keyword">this</span>.state.value &#125; &#125;)&#125;</span><br><span class="line">            value=&#123;<span class="keyword">this</span>.state.value&#125; /&gt;</span><br></pre></td></tr></table></figure></p>
+<h3 id="数据驱动与事件驱动"><a href="#数据驱动与事件驱动" class="headerlink" title="数据驱动与事件驱动"></a>数据驱动与事件驱动</h3><p>数据驱动，是按照redux的数据流去渲染。事件驱动，则是按照触发的事件通过中介者进行调度。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> config = &#123;</span><br><span class="line">    AOP: <span class="literal">true</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> eventConfig = &#123;</span><br><span class="line">    source: <span class="string">'StandardCase.EditMode'</span>,<span class="comment">//源组件</span></span><br><span class="line">    target: <span class="string">'Rate.EditMode'</span>,<span class="comment">//目标组件</span></span><br><span class="line">    sourceFunc: <span class="string">'onChange'</span>,<span class="comment">//源方法</span></span><br><span class="line">    targetFunc: <span class="string">'onChange'</span>,<span class="comment">//目标方法dynamicFunc</span></span><br><span class="line">    targetFuncArgs: [ <span class="string">'4'</span> ],<span class="comment">//参数</span></span><br><span class="line">    triggerMode: <span class="string">'custom'</span>,<span class="comment">//触发方式：static静态触发，按照预设参数去触发；dynamic动态触发，在运行时根据触发的方法带过来的参数触发；custom自定义的，按照自定义的规则触发。</span></span><br><span class="line">    DSL: <span class="string">'(function (args)&#123;if(args===true)&#123;return 4&#125; else &#123;return 2&#125;&#125;)'</span><span class="comment">//自定义方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="规范"><a href="#规范" class="headerlink" title="规范"></a>规范</h2><p>组件必须装饰@FormEngine，必须继承BaseComponent。<br>组件必须以函数驱动为导向，出入格式要规范参数全部用数组传递等等。<br>每个组件都必须提供自己的API列表，方便其他开发者配置和使用。</p>
+<h3 id="基类BaseComponent"><a href="#基类BaseComponent" class="headerlink" title="基类BaseComponent"></a>基类BaseComponent</h3><p>每个组件把自己转交给IoC容器，然后继承BaseComponent在切面中编写代码。<br>实例化IoC容器，并且把组件注入到容器中。<br>绑定aop切面，让子类可以方便的使用aop切面。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> displayName = <span class="string">'BaseComponent'</span></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.IoC = IoC.getInstance()</span><br><span class="line">        <span class="keyword">this</span>._aop = bind(<span class="keyword">this</span>.aop, <span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    componentWillMount() &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.props.displayName &amp;&amp; <span class="keyword">this</span>.props.displayName !== <span class="string">'undefined'</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!(<span class="keyword">this</span>.props.displayName.indexOf(<span class="string">'FormEngine'</span>) &gt; <span class="number">-1</span>)) &#123;</span><br><span class="line">                <span class="keyword">this</span>.IoC.injection(<span class="keyword">this</span>.props.displayName, <span class="keyword">this</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    aop(...args) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.props.AOP(...args)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="核心类FormEngine"><a href="#核心类FormEngine" class="headerlink" title="核心类FormEngine"></a>核心类FormEngine</h3><p>为什么要使用反向继承？<br>从宏观的角度来看。继承子组件的属性，并且可以控制子组件。<br>从微观的角度来看。继承了子组件就可以把AOP传给子组件，子组件可以使用AOP进行切面绑定。但是这个作用，属性代理也可以实现。只有反向继承子组件，才能使用子组件继承自BaseComponent的IoC容器，然后再通过IoC容器控制其他组件。针对这一点，属性代理无法实现。如果不反向继承，这将无法获得IoC容器。</p>
+<p>使用反向继承<br>不使用this.IoC，而是使用this.props.IoC可不可以？<br>不可以。这里的this指向EC，不是指向子组件。EC的props里面并没有IoC容器，EC的IoC容器是继承自子组件子组件继承自BaseComponent的IoC容器。</p>
+<p>this.IoC和this.props.IoC有什么区别？<br>反向继承了子组件子组件继承了BaseComponent，所以EC是有this.IoC的。但是，这里的this指向的是EC并不是指向子组件，所以this.props.IoC并没有值。</p>
+<p>使用属性代理<br>this.IoC和this.props.IoC有什么区别？<br>属性代理没有继承子组件所以没有this.IoC，同时也没有人传递给他props，所以这里的this.props.IoC也是undefined</p>
+<p>综上所述。<br>这里一定要用反向继承，并且一定要用this.IoC来获取容器以此来控制组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">FormEngine</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> ProxyComponent = <span class="keyword">new</span> <span class="built_in">Proxy</span>(WrappedComponent, handler)</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">EC</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">        <span class="keyword">static</span> displayName = <span class="string">`FormEngine(<span class="subst">$&#123;getDisplayName(WrappedComponent)&#125;</span>)`</span></span><br><span class="line">        <span class="keyword">constructor</span>() &#123;</span><br><span class="line">            <span class="keyword">super</span>()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//如果需要对子组件的方法进行切面，需要显示调用此方法。</span></span><br><span class="line">        <span class="comment">//注意这里的this是EC组件return之前的WrappedComponent，所以这里的this指向WrappedComponent但是它（参考对象是EC组件）没有props的。</span></span><br><span class="line">        <span class="comment">//this2是子组件的this，指向真实的子组件，所以有props，它与BaseComponent类似都是经历了React生命周期后形成的。</span></span><br><span class="line">        AOP(func, self, ...args) &#123;</span><br><span class="line">            <span class="comment">//在类的加载、实例化的时期执行。</span></span><br><span class="line">            <span class="comment">// return () =&gt; &#123;</span></span><br><span class="line">            <span class="comment">//在类的运行时期执行。</span></span><br><span class="line">            <span class="keyword">if</span> (config.AOP) &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="keyword">this</span>.displayName === eventConfig.source) &#123;</span><br><span class="line">                    <span class="keyword">if</span> (func.name &amp;&amp; func.name.indexOf(eventConfig.sourceFunc) &gt; <span class="number">-1</span>) &#123;</span><br><span class="line">                        <span class="keyword">let</span> toolInstance = <span class="keyword">this</span>.IoC.lookup(eventConfig.target)</span><br><span class="line">                        <span class="keyword">if</span> (toolInstance &amp;&amp; <span class="keyword">typeof</span> toolInstance[eventConfig.targetFunc] === <span class="string">'function'</span>) &#123;</span><br><span class="line">                            <span class="keyword">if</span> (eventConfig.triggerMode === <span class="string">'static'</span>) &#123;<span class="comment">//static静态触发，按照预设参数去触发</span></span><br><span class="line">                                <span class="keyword">let</span> event = args.pop()<span class="comment">//触发的事件</span></span><br><span class="line">                                toolInstance[eventConfig.targetFunc](...eventConfig.targetFuncArgs)<span class="comment">//触发目标组件方法</span></span><br><span class="line">                                func(event)<span class="comment">//触发源组件方法</span></span><br><span class="line">                            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (eventConfig.triggerMode === <span class="string">'dynamic'</span>) &#123;<span class="comment">//dynamic动态触发，在运行时根据触发的方法带过来的参数触发</span></span><br><span class="line">                                <span class="keyword">let</span> params = args[<span class="number">0</span>]</span><br><span class="line">                                toolInstance[eventConfig.targetFunc](params)</span><br><span class="line">                                func(params)</span><br><span class="line">                            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (eventConfig.triggerMode === <span class="string">'custom'</span>) &#123;<span class="comment">//custom自定义的，按照自定义的规则触发</span></span><br><span class="line">                                <span class="keyword">let</span> event = args.pop()<span class="comment">//触发的事件</span></span><br><span class="line">                                <span class="keyword">let</span> inData = event.target.value</span><br><span class="line">                                <span class="keyword">let</span> customFunc = <span class="built_in">eval</span>(eventConfig.DSL)</span><br><span class="line">                                <span class="keyword">let</span> outData = customFunc(inData)</span><br><span class="line">                                toolInstance[eventConfig.targetFunc](outData)</span><br><span class="line">                                func(event)</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                func(...args)</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// &#125;</span></span><br><span class="line">        &#125;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">const</span> props = <span class="built_in">Object</span>.assign(&#123;&#125;, <span class="keyword">this</span>.props, &#123; <span class="attr">AOP</span>: <span class="keyword">this</span>.AOP, <span class="attr">IoC</span>: <span class="keyword">this</span>.IoC, <span class="attr">displayName</span>: WrappedComponent.displayName &#125;)</span><br><span class="line">            <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">ProxyComponent</span> &#123;<span class="attr">...props</span>&#125; /&gt;</span></span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getDisplayName</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> WrappedComponent.displayName || WrappedComponent.name || <span class="string">'Component'</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> handler = &#123;</span><br><span class="line">    construct: <span class="function"><span class="keyword">function</span> (<span class="params">target, args</span>) </span>&#123;</span><br><span class="line">        <span class="comment">// console.log(`construct $&#123;target&#125;!`)</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.construct(target, args)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="keyword">get</span>: function (target, key, receiver) &#123;</span><br><span class="line">        <span class="comment">// console.log(`getting $&#123;key&#125;!`)</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.get(target, key, receiver)</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="keyword">set</span>: function (target, key, value, receiver) &#123;</span><br><span class="line">        <span class="comment">// console.log(`setting $&#123;key&#125;!`)</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">Reflect</span>.set(target, key, value, receiver)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="如何接入"><a href="#如何接入" class="headerlink" title="如何接入"></a>如何接入</h2><p>加入@FormEngine注解，把自己注入到IoC容器中。<br>继承BaseComponent，可以使用IoC容器和AOP切面。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">@FormEngine</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">EditMode</span> <span class="keyword">extends</span> <span class="title">BaseComponent</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> displayName = <span class="string">'Rate.EditMode'</span></span><br><span class="line">    <span class="keyword">static</span> propTypes = &#123;</span><br><span class="line">        submitData: PropTypes.func</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            value: <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>._onChange = bind(<span class="keyword">this</span>.onChange, <span class="keyword">this</span>)</span><br><span class="line">        <span class="keyword">this</span>._confirm = bind(<span class="keyword">this</span>.confirm, <span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    confirm() &#123;</span><br><span class="line">        <span class="keyword">this</span>.props.submitData(<span class="keyword">this</span>.state.value)</span><br><span class="line">    &#125;</span><br><span class="line">    onChange(args) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            value: args</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    dynamicFunc(args) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            value: <span class="number">3</span></span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div className=&#123;styles.container&#125;&gt;</span><br><span class="line">                &lt;div&gt;</span><br><span class="line">                    &lt;Rate allowHalf</span><br><span class="line">                        allowClear</span><br><span class="line">                        value=&#123;<span class="keyword">this</span>.state.value&#125;</span><br><span class="line">                        defaultValue=&#123;<span class="number">1</span>&#125;</span><br><span class="line">                        onChange=&#123;<span class="keyword">this</span>._onChange&#125; /&gt;</span><br><span class="line">                &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">                &lt;Button className=&#123;styles.confirmBtn&#125;</span></span><br><span class="line"><span class="regexp">                    htmlType='button'</span></span><br><span class="line"><span class="regexp">                    loading=&#123;false&#125;</span></span><br><span class="line"><span class="regexp">                    shape=&#123;null&#125;</span></span><br><span class="line"><span class="regexp">                    icon=&#123;null&#125;</span></span><br><span class="line"><span class="regexp">                    onClick=&#123;this._aop.bindArgs(this._confirm, this)&#125;</span></span><br><span class="line"><span class="regexp">                    size='default'</span></span><br><span class="line"><span class="regexp">                    type='primary'</span></span><br><span class="line"><span class="regexp">                    ghost&gt;</span></span><br><span class="line"><span class="regexp">                    确定</span></span><br><span class="line"><span class="regexp">                &lt;/</span>Button&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">@FormEngine</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">EditMode</span> <span class="keyword">extends</span> <span class="title">BaseComponent</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> displayName = <span class="string">'StandardCase.EditMode'</span></span><br><span class="line">    <span class="keyword">static</span> propTypes = &#123;</span><br><span class="line">        preview: PropTypes.bool,</span><br><span class="line">        toolData: PropTypes.bool,</span><br><span class="line">        submitData: PropTypes.func,</span><br><span class="line">        AOP: PropTypes.func</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            value: <span class="literal">true</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>._onChange = bind(<span class="keyword">this</span>.onChange, <span class="keyword">this</span>)</span><br><span class="line">        <span class="keyword">this</span>._confirm = bind(<span class="keyword">this</span>.confirm, <span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    onChange(e) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            value: e.target.value</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    confirm() &#123;</span><br><span class="line">        <span class="keyword">this</span>.props.submitData(<span class="keyword">this</span>.state.value)</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">const</span> options = [</span><br><span class="line">            &#123; <span class="attr">label</span>: <span class="string">'标准例'</span>, <span class="attr">value</span>: <span class="literal">true</span> &#125;,</span><br><span class="line">            &#123; <span class="attr">label</span>: <span class="string">'反例'</span>, <span class="attr">value</span>: <span class="literal">false</span> &#125;</span><br><span class="line">        ]</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div className=&#123;styles.container&#125;&gt;</span><br><span class="line">                &lt;div&gt;</span><br><span class="line">                    &lt;RadioGroup options=&#123;options&#125;</span><br><span class="line">                        onChange=&#123;<span class="keyword">this</span>._aop.bindArgs(<span class="keyword">this</span>._onChange, <span class="keyword">this</span>, &#123; <span class="attr">target</span>: &#123; <span class="attr">value</span>: !<span class="keyword">this</span>.state.value &#125; &#125;)&#125;</span><br><span class="line">                        value=&#123;<span class="keyword">this</span>.state.value&#125; /&gt;</span><br><span class="line">                &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">                &lt;Button className=&#123;styles.confirmBtn&#125;</span></span><br><span class="line"><span class="regexp">                    htmlType='button'</span></span><br><span class="line"><span class="regexp">                    loading=&#123;false&#125;</span></span><br><span class="line"><span class="regexp">                    shape=&#123;null&#125;</span></span><br><span class="line"><span class="regexp">                    icon=&#123;null&#125;</span></span><br><span class="line"><span class="regexp">                    onClick=&#123;this._confirm&#125;</span></span><br><span class="line"><span class="regexp">                    size='default'</span></span><br><span class="line"><span class="regexp">                    type='primary'</span></span><br><span class="line"><span class="regexp">                    ghost&gt;</span></span><br><span class="line"><span class="regexp">                    确定</span></span><br><span class="line"><span class="regexp">                &lt;/</span>Button&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>ToolsMng类<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">new</span> <span class="class"><span class="keyword">class</span> <span class="title">ToolsMng</span> </span>&#123;</span><br><span class="line">	<span class="keyword">constructor</span>() &#123;</span><br><span class="line">		<span class="keyword">this</span>.toolMap = &#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	registerTool(toolKey, tool) &#123;</span><br><span class="line">		<span class="keyword">this</span>.toolMap[toolKey] = tool</span><br><span class="line">	&#125;</span><br><span class="line">	getTool(toolKey) &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>.toolMap[toolKey]</span><br><span class="line">	&#125;</span><br><span class="line">	getToolMap() &#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">this</span>.toolMap</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>ToolsInit类<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> toolMng <span class="keyword">from</span> <span class="string">'./toolsMng'</span></span><br><span class="line">toolMng.registerTool(<span class="string">'audio_recorder'</span>, <span class="built_in">require</span>(<span class="string">'./audioRecorder'</span>))</span><br></pre></td></tr></table></figure></p>
+<p>具体创建方式<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> comp = toolMng.getTool(tool.key, tool.version)<span class="comment">//取出配置信息的key</span></span><br><span class="line">React.createElement(comp || ToolNotFound, props)</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/表单引擎/" rel="tag"># 表单引擎</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2018/03/01/blog/auto-build/auto-build/" rel="next" title="前端后端一体化自动构建">
+                <i class="fa fa-chevron-left"></i> 前端后端一体化自动构建
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/12/29/blog/higher-order-components/higher-order-components/" rel="prev" title="深入理解React高阶组件">
+                深入理解React高阶组件 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">大大白</p>
+              <p class="site-description motion-element" itemprop="description">沉淀下来的东西，才是真正属于自己的财富！</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#设计思想"><span class="nav-number">1.</span> <span class="nav-text">设计思想</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#控制反转（Inversion-of-Control）"><span class="nav-number">1.1.</span> <span class="nav-text">控制反转（Inversion of Control）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#面向切面（Aspect-Oriented-Programming）"><span class="nav-number">1.2.</span> <span class="nav-text">面向切面（Aspect-Oriented Programming）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据驱动与事件驱动"><span class="nav-number">1.3.</span> <span class="nav-text">数据驱动与事件驱动</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#规范"><span class="nav-number">2.</span> <span class="nav-text">规范</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基类BaseComponent"><span class="nav-number">2.1.</span> <span class="nav-text">基类BaseComponent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#核心类FormEngine"><span class="nav-number">2.2.</span> <span class="nav-text">核心类FormEngine</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何接入"><span class="nav-number">3.</span> <span class="nav-text">如何接入</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大大白</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Gemini</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

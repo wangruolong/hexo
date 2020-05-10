@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前端项目每次发布的时候需要手动 run build 然后提交 dist。难道就没有办法来解决这种没意义而又重复劳作的事情吗？git上面居然会有编译后的文件，你的良心不会痛吗？配置文件是通过匹配域名来区分不同的变量，不觉得这很 low 吗？你还在为当接口出问题因为看不到服务端代码而不知道怎么跟人家吵架而感到苦恼吗？用 npm run build 然后提交 dist 发布这样会隐藏着一个定时炸弹。在">
+<meta name="keywords" content="前后端一体化构建">
+<meta property="og:type" content="article">
+<meta property="og:title" content="前端后端一体化自动构建">
+<meta property="og:url" content="https://ruolong.wang/2018/03/01/blog/auto-build/auto-build/index.html">
+<meta property="og:site_name" content="大大白的个人博客">
+<meta property="og:description" content="前端项目每次发布的时候需要手动 run build 然后提交 dist。难道就没有办法来解决这种没意义而又重复劳作的事情吗？git上面居然会有编译后的文件，你的良心不会痛吗？配置文件是通过匹配域名来区分不同的变量，不觉得这很 low 吗？你还在为当接口出问题因为看不到服务端代码而不知道怎么跟人家吵架而感到苦恼吗？用 npm run build 然后提交 dist 发布这样会隐藏着一个定时炸弹。在">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-09T16:06:36.405Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="前端后端一体化自动构建">
+<meta name="twitter:description" content="前端项目每次发布的时候需要手动 run build 然后提交 dist。难道就没有办法来解决这种没意义而又重复劳作的事情吗？git上面居然会有编译后的文件，你的良心不会痛吗？配置文件是通过匹配域名来区分不同的变量，不觉得这很 low 吗？你还在为当接口出问题因为看不到服务端代码而不知道怎么跟人家吵架而感到苦恼吗？用 npm run build 然后提交 dist 发布这样会隐藏着一个定时炸弹。在">
+
+
+
+
+
+
+  <link rel="canonical" href="https://ruolong.wang/2018/03/01/blog/auto-build/auto-build/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>前端后端一体化自动构建 | 大大白的个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">大大白的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">人生就像一场旅行，身体和灵魂总有一个要在路上！</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works1">
+    <a href="/blog/works1/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>H5小游戏1</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works2">
+    <a href="/blog/works2/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>H5小游戏2</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-fiction">
+    <a href="/blog/fiction/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>大将军归来</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ruolong.wang/blog/2018/03/01/blog/auto-build/auto-build/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大大白">
+      <meta itemprop="description" content="沉淀下来的东西，才是真正属于自己的财富！">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大大白的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">前端后端一体化自动构建
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-03-01 11:48:00" itemprop="dateCreated datePublished" datetime="2018-03-01T11:48:00+08:00">2018-03-01</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-05-10 00:06:36" itemprop="dateModified" datetime="2020-05-10T00:06:36+08:00">2020-05-10</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/服务端/" itemprop="url" rel="index"><span itemprop="name">服务端</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/服务端/自动构建/" itemprop="url" rel="index"><span itemprop="name">自动构建</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前端项目每次发布的时候需要手动 run build 然后提交 dist。难道就没有办法来解决这种没意义而又重复劳作的事情吗？git上面居然会有编译后的文件，你的良心不会痛吗？配置文件是通过匹配域名来区分不同的变量，不觉得这很 low 吗？你还在为当接口出问题因为看不到服务端代码而不知道怎么跟人家吵架而感到苦恼吗？用 npm run build 然后提交 dist 发布这样会隐藏着一个定时炸弹。在 windows 下是大小写不敏感的，当你编译完之后那些文件已经互相链接在一起，发布到 linux 当然可以正常运行。但是假如有一天，项目组决定不能再在本地构建然后提交代码了，必须要在云服务器构建。那么 linux 下是大小写敏感的，编译的时候文件链接不到一起，就会报各种 xxx 文件找不到。<br>如果你曾经遇到过以上几点，那么恭喜你，这篇文章可以为你解决全部问题！<br><a id="more"></a></p>
+<h2 id="前置知识点"><a href="#前置知识点" class="headerlink" title="前置知识点"></a>前置知识点</h2><p>Maven 是一个项目管理的综合工具。Maven 提供了开发人员构建一个完整的生命周期框架，简化和标准化项目建设过程。MAVEN 定义了<code>标准的目录结构</code>。以下是 Maven 定义的标准目录 Standard Directory Layout</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Directory</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">src/main/java</td>
+<td style="text-align:center">Application/Library sources</td>
+</tr>
+<tr>
+<td style="text-align:center">src/main/resources</td>
+<td style="text-align:center">Application/Library resources</td>
+</tr>
+<tr>
+<td style="text-align:center">src/main/filters</td>
+<td style="text-align:center">Resource filter files</td>
+</tr>
+<tr>
+<td style="text-align:center">src/main/webapp</td>
+<td style="text-align:center">Web application sources</td>
+</tr>
+<tr>
+<td style="text-align:center">src/test/java</td>
+<td style="text-align:center">Test sources</td>
+</tr>
+<tr>
+<td style="text-align:center">src/test/resources</td>
+<td style="text-align:center">Test resources</td>
+</tr>
+<tr>
+<td style="text-align:center">src/test/filters</td>
+<td style="text-align:center">Test resource filter files</td>
+</tr>
+<tr>
+<td style="text-align:center">src/it</td>
+<td style="text-align:center">Integration Tests (primarily for plugins)</td>
+</tr>
+<tr>
+<td style="text-align:center">src/assembly</td>
+<td style="text-align:center">Assembly descriptors</td>
+</tr>
+<tr>
+<td style="text-align:center">src/site</td>
+<td style="text-align:center">Site</td>
+</tr>
+<tr>
+<td style="text-align:center">LICENSE.txt</td>
+<td style="text-align:center">Project’s license</td>
+</tr>
+<tr>
+<td style="text-align:center">NOTICE.txt</td>
+<td style="text-align:center">Notices and attributions required by libraries that the project depends on</td>
+</tr>
+<tr>
+<td style="text-align:center">README.txt</td>
+<td style="text-align:center">Project’s readme</td>
+</tr>
+</tbody>
+</table>
+<p>在这里我们主要重点关注这三个目录和生命周期中的两个阶段</p>
+<ul>
+<li>三个目录<ul>
+<li>Application/Library sources 的目录<code>src/main/java</code>，本文后续简称为 source。</li>
+<li>Application/Library resources 的目录<code>src/main/resources</code>，本文后续简称为 resource。</li>
+<li>Web application sources 的目录<code>src/main/webapp</code>，本文后续简称为 webResource。</li>
+</ul>
+</li>
+<li>两个阶段<ul>
+<li>compile 阶段</li>
+<li>package 阶段（coping 相关文件，打成 war 包）</li>
+</ul>
+</li>
+</ul>
+<p>简单来说，compile 阶段会编译<code>src/main/java</code>目录中的文件，package 阶段要分两个步骤：第一步，复制相关的文件，把刚才 compile 阶段编译好的文件加上<code>src/main/webapp</code>和<code>src/main/resources</code>的文件复制到一个新的文件夹中一般默认情况下是<code>program-name-0.1.0-SNAPSHOT</code>；第二步，把<code>program-name-0.1.0-SNAPSHOT</code>打成 war 包<code>program-name-0.1.0-SNAPSHOT.war</code>。</p>
+<p>至此，前置知识就都介绍完了。接下来我们会在 maven 构建的流程下配置我们前端的构建信息。<br>我们会把目录结构设置成这个样子<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">|-- pom.xml</span><br><span class="line">`-- src</span><br><span class="line">    `-- main</span><br><span class="line">        |-- java</span><br><span class="line">        |-- js</span><br><span class="line">        |-- webapp</span><br></pre></td></tr></table></figure></p>
+<p>接下来我们会通过几个问题来对自动化构建抽丝剥茧，最终使你对整个构建有一个全面的认识。</p>
+<h2 id="思考几个问题"><a href="#思考几个问题" class="headerlink" title="思考几个问题"></a>思考几个问题</h2><h3 id="js-目录能不能放在-webapp-底下？为什么？"><a href="#js-目录能不能放在-webapp-底下？为什么？" class="headerlink" title="js 目录能不能放在 webapp 底下？为什么？"></a>js 目录能不能放在 webapp 底下？为什么？</h3><ul>
+<li>首先，做过 J2EE 开发的同学一定会觉得页面文件应该放到 webapp 里面。但是事实上 js 目录底下的文件并不是直接就是页面文件，它需要经过编译后才能变成页面文件。所以<code>页面文件应该放到webapp里面</code>这句话没有错，但是不够确切，应该这么说会恰当一点<code>webapp里面放的是可直接访问的页面文件</code>。</li>
+<li>然后，说明它不放在 webapp 里面是正确的。这些 js 并不是可以直接访问的页面必须要经过编译后才能被访问，所以不放在 webapp 里面是正确的。</li>
+<li>再来，说明它放在 webapp 里面是错误的。我们 js 目录底下的文件数量可以说是非常多的，想一下 node_modules 就知道了，即便是不考虑 node_modules 我们项目的文件数量在很多情况下都可以说是成百上千，工程大的更是成千上万，这么多数量的文件放在 webapp 里面，当 maven 在 package 阶段的第一步的时候就会占用大量内存（亲测，云服务器的 web 容器因此挂掉了）造成没必要的资源浪费，而且这样打包时间太长了，把时间都耗费在 IO 上面了。所以它放在 webapp 里面是错误的。</li>
+<li>最后，总结一下。<code>webapp底下应该放的是可直接访问的页面</code>。</li>
+</ul>
+<h3 id="不同的环境配置了不同的-webpack，如果不能手动-run-build，那我该如何让其自动选择对应环境的-webpack？"><a href="#不同的环境配置了不同的-webpack，如果不能手动-run-build，那我该如何让其自动选择对应环境的-webpack？" class="headerlink" title="不同的环境配置了不同的 webpack，如果不能手动 run build，那我该如何让其自动选择对应环境的 webpack？"></a>不同的环境配置了不同的 webpack，如果不能手动 run build，那我该如何让其自动选择对应环境的 webpack？</h3><p>pom.xml<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- compile阶段的相关配置 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">source</span>&gt;</span>$&#123;java.version&#125;<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">target</span>&gt;</span>$&#123;java.version&#125;<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">showWarnings</span>&gt;</span>true<span class="tag">&lt;/<span class="name">showWarnings</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- package阶段之前执行的一些插件 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.codehaus.mojo<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>exec-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.4.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>cnpm install<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">phase</span>&gt;</span>prepare-package<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>exec<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">executable</span>&gt;</span>cnpm<span class="tag">&lt;/<span class="name">executable</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">workingDirectory</span>&gt;</span>./src/main/js<span class="tag">&lt;/<span class="name">workingDirectory</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">arguments</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">argument</span>&gt;</span>install<span class="tag">&lt;/<span class="name">argument</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">arguments</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>gulp build<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">phase</span>&gt;</span>prepare-package<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>exec<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">executable</span>&gt;</span>cnpm<span class="tag">&lt;/<span class="name">executable</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">workingDirectory</span>&gt;</span>./src/main/js<span class="tag">&lt;/<span class="name">workingDirectory</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">arguments</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">argument</span>&gt;</span>run<span class="tag">&lt;/<span class="name">argument</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">argument</span>&gt;</span>build:$&#123;env&#125;<span class="tag">&lt;/<span class="name">argument</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">arguments</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- package阶段的相关配置 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-war-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">webResources</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/filters/webResources/$&#123;env&#125;<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">webResources</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">warSourceIncludes</span>&gt;</span>index.html,*.js,WEB-INF/**,static/**<span class="tag">&lt;/<span class="name">warSourceIncludes</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure></p>
+<p>package.json<br><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">"scripts": &#123;</span><br><span class="line">    "build:development":    "rimraf ../webapp/* &amp;&amp; webpack -p --config ./webpack/webpack.development.config.js    --progress --profile --colors --display-error-details --display-cached",</span><br><span class="line">    "build:test":           "rimraf ../webapp/* &amp;&amp; webpack -p --config ./webpack/webpack.test.config.js           --progress --profile --colors --display-error-details --display-cached",</span><br><span class="line">    "build:preproduction":  "rimraf ../webapp/* &amp;&amp; webpack -p --config ./webpack/webpack.preproduction.config.js  --progress --profile --colors --display-error-details --display-cached",</span><br><span class="line">    "build:product":        "rimraf ../webapp/* &amp;&amp; webpack -p --config ./webpack/webpack.product.config.js        --progress --profile --colors --display-error-details --display-cached"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li><p>maven 插件<a href="http://maven.apache.org/components/plugins/maven-compiler-plugin/" target="_blank" rel="noopener">maven-compiler-plugin</a><br>maven 编译阶段的配置。<code>&lt;source /&gt;</code>:源版本，因为有些 web 容器是要指定版本的，这里默认源和目标版本都一致。<code>&lt;target /&gt;</code>:目标版本，因为有些 web 容器是要指定版本的，这里默认源和目标版本都一致。<code>&lt;showWarnings /&gt;</code>:是否显示警告</p>
+</li>
+<li><p>maven 插件<a href="http://mojo.codehaus.org/exec-maven-plugin/" target="_blank" rel="noopener">exec-maven-plugin</a><br>运行任何本地的系统命令。<code>&lt;id /&gt;</code>:唯一标示命令。<code>&lt;phase /&gt;</code>:执行时期，prepare-package 预打包时期。<code>&lt;goals /&gt;</code>:exec 有两种，一种是 exec 另一种是 java。exec 比 java 更强大。<code>&lt;configuration /&gt;</code>：具体配置。<code>&lt;executable /&gt;</code>：命令名称。<code>&lt;workingDirectory /&gt;</code>：执行该命令所处路径。<code>&lt;arguments /&gt;</code>：可选参数，每个参数都用<code>&lt;argument&gt;</code>包起来。<code>${env}</code>：引用 pom 定义的变量 env。<br>这样配置后，我们在云服务器上发布，当执行到这个插件的时候就会根据实际的环境执行相应的命令<code>cnpm install</code> <code>cnpm run build:product</code>，而系统接收到这个命令后就会去执行对应的 package.json 里面的<code>build:product</code>对应的脚本</p>
+</li>
+<li><p>maven 插件<a href="http://maven.apache.org/plugins/maven-war-plugin/" target="_blank" rel="noopener">maven-war-plugin</a><br>WAR Plugin 负责收集 web 应用程序的所有工件（项目）依赖项、类和资源，并将它们打包到 web 应用程序存档中。换句话说就是对项目进行动态打包。<br>maven-war-plugin 会执行两个事情。第一步：复制 webResource 文件<code>[INFO] Copying webapp webResources [%projectPath%/src/main/filters/webResources/development] to [%projectPath%\target\program-name-0.1.0-SNAPSHOT]</code>复制 webapp 底下的 resource 文件<code>[INFO] Copying webapp resources [%projectPath%\src\main\webapp] to [%projectPath%\target\program-name-0.1.0-SNAPSHOT]</code>。第二步：把<code>program-name-0.1.0-SNAPSHOT</code>打成 war 包。<br><code>&lt;webResources /&gt;</code>用来配置<code>resource</code>的目录<code>src/main/filters/webResources/${env}</code>。<code>&lt;warSourceIncludes /&gt;</code>用来配置<code>package阶段</code>的第一步<code>coping相关文件</code>的过滤规则。<code>&lt;packagingExcludes /&gt;</code>用来配置<code>package阶段</code>的第二步<code>打成war包</code>的过滤规则。</p>
+</li>
+<li><p>warSourceExcludes 和 packagingExcludes 的区别<br>warSourceExcludes 是在<code>compile编译阶段</code>完成后，<code>package阶段</code>的第一步，过滤文件使其不被复制到目录下<code>program-name-0.1.0-SNAPSHOT</code>。<br>packagingExcludes 是在<code>compile编译阶段</code>完成后，<code>package阶段</code>的第二步，过滤文件使其不被打包到文件内<code>program-name-0.1.0-SNAPSHOT.war</code></p>
+</li>
+<li><p>也许有人会问，既然这里可以<code>Excludes</code>不要的文件，那么第一个问题，js 也是可以放 webapp 下面然后再忽略掉不就可以了？<br>遗憾的是 maven-war-plugin 是在其他插件（比如 exec-maven-plugin）都执行完之后才执行，因为这个插件的作用是把所有编译后的文件 copy 到即将被打包的<code>program-name-0.1.0-SNAPSHOT</code>文件夹下面，所以它必须最后做，也就是说它必须等所有相关的插件都执行完了，才能执行。另外，假如把 js 放到 webapp 下面，即便是使用了<code>&lt;warSourceIncludes /&gt;</code>来过滤复制的文件，但是因为在复制之前构建索引就要花费了大量的性能，以及复制的过程中消耗了大量的 IO，会占用系统很大的资源，所以有可能会产生内存溢出的问题。</p>
+</li>
+</ol>
+<h3 id="进阶问题。Maven-构建的时候能否指定-Coping-webResource-和-Coping-resource-？-答案是不能。为什么？"><a href="#进阶问题。Maven-构建的时候能否指定-Coping-webResource-和-Coping-resource-？-答案是不能。为什么？" class="headerlink" title="进阶问题。Maven 构建的时候能否指定 Coping webResource 和 Coping resource ？ 答案是不能。为什么？"></a>进阶问题。Maven 构建的时候能否指定 Coping webResource 和 Coping resource ？ 答案是不能。为什么？</h3><p>我们前面讲到 webResource 是 webapp 里面的文件，resource 是全局的一些资源文件。maven 会根据自己定义好的标准目录结构，编译<code>src/main/java</code>复制<code>src/main/resources</code>和<code>src/main/webapp</code>到<code>program-name-0.1.0-SNAPSHOT</code>然后再打成 war 包。所以，只要是 maven 项目，就必须按照它定义好的目录结构来放文件。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>前后端一体化自动构建有几个好处</p>
+<ul>
+<li>发布的时候不用每次 npm run build 只要跟后端的同学一样提交代码，剩下的交给服务器去做。</li>
+<li>config 等全局性质的配置文件不用再通过 url 匹配出对应的值，只要交给云服务器自动把对应环境的配置生效即可。</li>
+<li>后端的代码前端的同学可以很容易看到，有些问题甚至可以直接改掉，减少不必要的沟通。例如返回的字段错了<code>item</code>没加<code>s</code>等等显而易见的问题。</li>
+<li>自从能看到服务端接口的代码后，跟后端的同学讨论问题就更有底气了。</li>
+<li>一个量化的数据是，原来用 npm run build 因为工程大，项目文件多，每次 run build 都要非常久，然后还要 commit 才能发布。后来经过改造，在<code>package打包阶段</code>过滤掉了许多文件大幅减少 IO，同时只打包有用的文件，从整体上提高了发布速度，从原来的将近半个小时缩短为三分钟。</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/前后端一体化构建/" rel="tag"># 前后端一体化构建</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2018/01/03/blog/git/git/" rel="next" title="Git">
+                <i class="fa fa-chevron-left"></i> Git
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2018/06/28/blog/thinking-in-form-engine/thinking-in-form-engine/" rel="prev" title="表单引擎设计思想">
+                表单引擎设计思想 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">大大白</p>
+              <p class="site-description motion-element" itemprop="description">沉淀下来的东西，才是真正属于自己的财富！</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前置知识点"><span class="nav-number">1.</span> <span class="nav-text">前置知识点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#思考几个问题"><span class="nav-number">2.</span> <span class="nav-text">思考几个问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#js-目录能不能放在-webapp-底下？为什么？"><span class="nav-number">2.1.</span> <span class="nav-text">js 目录能不能放在 webapp 底下？为什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#不同的环境配置了不同的-webpack，如果不能手动-run-build，那我该如何让其自动选择对应环境的-webpack？"><span class="nav-number">2.2.</span> <span class="nav-text">不同的环境配置了不同的 webpack，如果不能手动 run build，那我该如何让其自动选择对应环境的 webpack？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进阶问题。Maven-构建的时候能否指定-Coping-webResource-和-Coping-resource-？-答案是不能。为什么？"><span class="nav-number">2.3.</span> <span class="nav-text">进阶问题。Maven 构建的时候能否指定 Coping webResource 和 Coping resource ？ 答案是不能。为什么？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大大白</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Gemini</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

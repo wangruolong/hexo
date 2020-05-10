@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="目前React组件实现组合的方式一般常见的有两种，一种是Mixins的方式，另外一种是高阶组件。">
+<meta name="keywords" content="高阶组件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解React高阶组件">
+<meta property="og:url" content="https://ruolong.wang/2018/12/29/blog/higher-order-components/higher-order-components/index.html">
+<meta property="og:site_name" content="大大白的个人博客">
+<meta property="og:description" content="目前React组件实现组合的方式一般常见的有两种，一种是Mixins的方式，另外一种是高阶组件。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/1.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/2.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/3.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/4.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/5.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/6.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/7.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/8.jpg">
+<meta property="og:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/9.jpg">
+<meta property="og:updated_time" content="2020-04-15T10:59:20.803Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深入理解React高阶组件">
+<meta name="twitter:description" content="目前React组件实现组合的方式一般常见的有两种，一种是Mixins的方式，另外一种是高阶组件。">
+<meta name="twitter:image" content="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/1.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="https://ruolong.wang/2018/12/29/blog/higher-order-components/higher-order-components/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>深入理解React高阶组件 | 大大白的个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">大大白的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">人生就像一场旅行，身体和灵魂总有一个要在路上！</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works1">
+    <a href="/blog/works1/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>H5小游戏1</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works2">
+    <a href="/blog/works2/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>H5小游戏2</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-fiction">
+    <a href="/blog/fiction/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>大将军归来</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ruolong.wang/blog/2018/12/29/blog/higher-order-components/higher-order-components/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大大白">
+      <meta itemprop="description" content="沉淀下来的东西，才是真正属于自己的财富！">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大大白的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深入理解React高阶组件
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-29 12:00:00" itemprop="dateCreated datePublished" datetime="2018-12-29T12:00:00+08:00">2018-12-29</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-04-15 18:59:20" itemprop="dateModified" datetime="2020-04-15T18:59:20+08:00">2020-04-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/" itemprop="url" rel="index"><span itemprop="name">WEB前端</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/高阶组件/" itemprop="url" rel="index"><span itemprop="name">高阶组件</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>目前React组件实现组合的方式一般常见的有两种，一种是Mixins的方式，另外一种是高阶组件。</p>
+<a id="more"></a>
+<h2 id="两者的对比"><a href="#两者的对比" class="headerlink" title="两者的对比"></a>两者的对比</h2><p>Mixins是通过混入的方式，向现有组件类添加逻辑。mixin，是将一个模块混入到一个另一个模块中，或是一个类中。它并不是react特有的，许多编程语言都有引入了mixins这样一种特性。事实上，包括C++等一些年龄较大的OOP语言，有一个强大但危险的多重继承特性。现代语言为了权衡利弊，大都舍弃了多重继承，只采用单继承。但单继承在实现抽象时有着诸多不便之处，为了弥补缺失，如Java就引入interface，其它一些语言引入了像Mixin的技巧，方法不同,但都是为创造一种 类似多重继承的效果，事实上说它是组合更为贴切。</p>
+<p>高阶组件是通过函数的方式，向现有组件类添加逻辑。要理解高阶组件就要先知道高阶函数（Higher-Order function）。高阶函数在函数式编程是一个基本概念，它描述的是这样一种函数，接受函数作为输入，或是输出一个函数。比如常用的工具方法 map、reduce、sort 都是高阶函数。</p>
+<p>相同点：都是为了向组件类增加功能。不同点：mixins直截了当，HOC温婉优雅。如果说mixins是面向对象的组合，HOC则是面向函数式编程的组合。</p>
+<h2 id="React-Mixins"><a href="#React-Mixins" class="headerlink" title="React Mixins"></a>React Mixins</h2><h3 id="Mixins的两种用法"><a href="#Mixins的两种用法" class="headerlink" title="Mixins的两种用法"></a>Mixins的两种用法</h3><h4 id="用法一"><a href="#用法一" class="headerlink" title="用法一"></a>用法一</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">let</span> MixinA = &#123;</span><br><span class="line">    getDefaultProps: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            aa: <span class="string">'MixinA.props.aa'</span>,</span><br><span class="line">            bb: <span class="string">'MixinA.props.bb'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    getInitialState: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            aa: <span class="string">'MixinA.state.aa'</span>,</span><br><span class="line">            bb: <span class="string">'MixinA.state.bb'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    componentWillMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinA---Component will mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    componentDidMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinA---Component did mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    aa: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.bb()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> MixinB = &#123;</span><br><span class="line">    componentWillMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinB---Component will mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    componentDidMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinB---Component did mount'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> CompA = React.createClass(&#123;</span><br><span class="line">    mixins: [MixinA, MixinB],</span><br><span class="line">    getDefaultProps: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            cc: <span class="string">'compa.props.cc'</span>,</span><br><span class="line">            dd: <span class="string">'compa.props.dd'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    getInitialState: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            cc: <span class="string">'compa.state.cc'</span>,</span><br><span class="line">            dd: <span class="string">'compa.state.dd'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    componentWillMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component will mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    componentDidMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component did mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    bb: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'xxxxx'</span>)</span><br><span class="line">    &#125;,</span><br><span class="line">    render: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component props'</span>, <span class="keyword">this</span>.props)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component state'</span>, <span class="keyword">this</span>.state)</span><br><span class="line">        <span class="keyword">this</span>.aa()</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                react mixins使用演示</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;)</span></span><br><span class="line"><span class="regexp">ReactDOM.render(&lt;CompA /</span>&gt;, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h4 id="用法二"><a href="#用法二" class="headerlink" title="用法二"></a>用法二</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">import</span> ReactMixin <span class="keyword">from</span> <span class="string">'react-mixin'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> MixinA = &#123;</span><br><span class="line">    getDefaultProps: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            aa: <span class="string">'MixinA.props.aa'</span>,</span><br><span class="line">            bb: <span class="string">'MixinA.props.bb'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    getInitialState: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            aa: <span class="string">'MixinA.state.aa'</span>,</span><br><span class="line">            bb: <span class="string">'MixinA.state.bb'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">    componentWillMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinA---Component will mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    componentDidMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinA---Component did mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    aa: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.bb()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> MixinB = &#123;</span><br><span class="line">    componentWillMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinB---Component will mount'</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    componentDidMount: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'MixinB---Component did mount'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CompA</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            cc: <span class="string">'compa.state.cc'</span>,</span><br><span class="line">            dd: <span class="string">'compa.state.dd'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    componentWillMount() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component will mount'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component did mount'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    bb() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'At CompA dispatch function aa of MixinA and at MixinA dispatch function bb of CompA.'</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component props'</span>, <span class="keyword">this</span>.props)</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'CompA---Component state'</span>, <span class="keyword">this</span>.state)</span><br><span class="line">        <span class="keyword">this</span>.aa()</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                react mixins使用演示</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">CompA.defaultProps = &#123;</span></span><br><span class="line"><span class="regexp">    cc: 'compa.props.cc',</span></span><br><span class="line"><span class="regexp">    dd: 'compa.props.dd'</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">ReactMixin.onClass(CompA, MixinA)</span></span><br><span class="line"><span class="regexp">ReactMixin.onClass(CompA, MixinB)</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">ReactDOM.render(&lt;CompA /</span>&gt;, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h3 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a>优缺点</h3><p>优点<br>我们能够通过在一个Mixin中维护这个共享的功能,来很容易的避免任何重复,而因此专注于只实现我们系统中真正彼此不同的功能。</p>
+<p>缺点<br>在 React 中，Mixins 是传统的为 Component 进行扩展的做法。Mixins 的做法很像传统的命令式编程，即要扩展的组件决定需要哪些扩展(Mixins)，以及了解所有扩展(Mixins)的细节，从而避免状态污染。当 Mixins 多了之后，被扩展组件需要维护的状态和掌握的”知识”越来越多，因此也就越来越难维护，因为责任都被交给了”最后一棒”(Last Responsible Moment)。</p>
+<h3 id="Mixins小结"><a href="#Mixins小结" class="headerlink" title="Mixins小结"></a>Mixins小结</h3><p>目前几乎很少有人会使用React.createClass的方式使用React，JSX + ES6成了标配，React团队已经声明React.createClass最终会被React.Component的类形式所取代。用ES6来编写React组件的话，将不建议你使用React的mixin机制。<br>高阶组件（Higher order components）作为 mixin 之外的一种组件抽象与处理形式成为mixins在ES6下的替代方案。</p>
+<h2 id="React-HOC"><a href="#React-HOC" class="headerlink" title="React HOC"></a>React HOC</h2><p>高阶组件（Higher-Order Components）就是一个函数，且该函数接受一个组件作为参数，并返回一个新的组件。</p>
+<blockquote>
+<p>const EnhancedComponent = higherOrderComponent(WrappedComponent);</p>
+</blockquote>
+<p>在React中的用法总结起来有两种：属性代理（Props Proxy）和反向继承（Inheritance Inversion）</p>
+<h3 id="属性代理（Props-Proxy）"><a href="#属性代理（Props-Proxy）" class="headerlink" title="属性代理（Props Proxy）"></a>属性代理（Props Proxy）</h3><p>高阶组件操控传递给 WrappedComponent 的 props，大概有以下几种用法：包装元素、代理props、通过ref获取组件实例、抽象state</p>
+<h4 id="包装元素（wrapped-elements）"><a href="#包装元素（wrapped-elements）" class="headerlink" title="包装元素（wrapped elements）"></a>包装元素（wrapped elements）</h4><img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/1.jpg">
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PPHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">PP</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">return</span> (</span><br><span class="line">                &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid red'</span>, <span class="attr">padding</span>: <span class="string">'0px 30px 30px 30px'</span>&#125;&#125;&gt;</span><br><span class="line">                    &lt;h1&gt;HOC Component&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;WrappedComponent &#123;...this.props&#125;/</span>&gt;</span><br><span class="line">                &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">            )</span></span><br><span class="line"><span class="regexp">        &#125;</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">class Example extends React.Component &#123;</span></span><br><span class="line"><span class="regexp">    render() &#123;</span></span><br><span class="line"><span class="regexp">        return (&lt;div style=&#123;&#123;border: '2px solid blue'&#125;&#125;&gt;</span></span><br><span class="line"><span class="regexp">            &lt;h2&gt;Wrapped Component&lt;/</span>h2&gt;</span><br><span class="line">            &lt;p&gt;<span class="xml"><span class="tag">&lt;<span class="name">b</span>&gt;</span>Props:<span class="tag">&lt;/<span class="name">b</span>&gt;</span></span><span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>div&gt;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> EnhancedExample = PPHOC(Example)</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">EnhancedExample</span> <span class="attr">date</span>=<span class="string">&#123;(new</span> <span class="attr">Date</span>)<span class="attr">.toLocaleDateString</span>()&#125;/&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h4 id="代理props"><a href="#代理props" class="headerlink" title="代理props"></a>代理props</h4><img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/2.jpg">
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="comment">// Props Proxy demonstration</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PPHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">PP</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">const</span> props = <span class="built_in">Object</span>.assign(&#123;&#125;, <span class="keyword">this</span>.props, &#123;</span><br><span class="line">                user: &#123;</span><br><span class="line">                    name: <span class="string">'Fran'</span>,</span><br><span class="line">                    email: <span class="string">'franleplant@gmail.com'</span></span><br><span class="line">                &#125;</span><br><span class="line">            &#125;)</span><br><span class="line">            <span class="keyword">return</span> (<span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&#123;&#123;border:</span> '<span class="attr">2px</span> <span class="attr">solid</span> <span class="attr">red</span>', <span class="attr">padding:</span> '<span class="attr">0px</span> <span class="attr">30px</span> <span class="attr">30px</span> <span class="attr">30px</span>'&#125;&#125;&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">h1</span>&gt;</span>HOC Component<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">b</span>&gt;</span>Props:<span class="tag">&lt;/<span class="name">b</span>&gt;</span><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">b</span>&gt;</span>State:<span class="tag">&lt;/<span class="name">b</span>&gt;</span><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">WrappedComponent</span> &#123;<span class="attr">...props</span>&#125; /&gt;</span></span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid blue'</span>&#125;&#125;&gt;</span><br><span class="line">                &lt;h2&gt;Wrapped Component&lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// const EnhancedExample = Example</span></span><br><span class="line"><span class="keyword">const</span> EnhancedExample = PPHOC(Example)</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">EnhancedExample</span> <span class="attr">date</span>=<span class="string">&#123;(new</span> <span class="attr">Date</span>)<span class="attr">.toLocaleDateString</span>()&#125;/&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h4 id="通过ref获取组件实例"><a href="#通过ref获取组件实例" class="headerlink" title="通过ref获取组件实例"></a>通过ref获取组件实例</h4><img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/3.jpg">
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="comment">// Props Proxy with ref demonstration</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PPHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">PP</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">        <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">            <span class="keyword">super</span>(props)</span><br><span class="line">            <span class="keyword">this</span>.state = &#123;<span class="attr">name</span>: <span class="string">''</span>&#125;</span><br><span class="line">            <span class="keyword">this</span>.getInstanceName = <span class="keyword">this</span>.getInstanceName.bind(<span class="keyword">this</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        getInstanceName(instance) &#123;</span><br><span class="line">            <span class="keyword">if</span> (instance.instanceName !== <span class="keyword">this</span>.state.name)</span><br><span class="line">                <span class="keyword">this</span>.setState(&#123;<span class="attr">name</span>: instance.instanceName&#125;)</span><br><span class="line">        &#125;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">const</span> props = <span class="built_in">Object</span>.assign(&#123;&#125;, <span class="keyword">this</span>.props, &#123;</span><br><span class="line">                ref: <span class="keyword">this</span>.getInstanceName</span><br><span class="line">            &#125;)</span><br><span class="line">            <span class="keyword">return</span> (</span><br><span class="line">                &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid red'</span>, <span class="attr">padding</span>: <span class="string">'0px 30px 30px 30px'</span>&#125;&#125;&gt;</span><br><span class="line">                    &lt;h1&gt;HOC Component&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;This:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;WrappedComponent &#123;...props&#125;/</span>&gt;</span><br><span class="line">                &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">            )</span></span><br><span class="line"><span class="regexp">        &#125;</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">class Example extends React.Component &#123;</span></span><br><span class="line"><span class="regexp">    constructor(props) &#123;</span></span><br><span class="line"><span class="regexp">        super(props)</span></span><br><span class="line"><span class="regexp">        this.instanceName = 'han solo'</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">    render() &#123;</span></span><br><span class="line"><span class="regexp">        return (</span></span><br><span class="line"><span class="regexp">            &lt;div style=&#123;&#123;border: '2px solid blue'&#125;&#125;&gt;</span></span><br><span class="line"><span class="regexp">                &lt;h2&gt;Wrapped Component&lt;/</span>h2&gt;</span><br><span class="line">                &lt;p&gt;<span class="xml"><span class="tag">&lt;<span class="name">b</span>&gt;</span>This:<span class="tag">&lt;/<span class="name">b</span>&gt;</span></span><span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(&#123;'instanceName': this.instanceName&#125;)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// const EnhancedExample = Example</span></span><br><span class="line"><span class="keyword">const</span> EnhancedExample = PPHOC(Example)</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">EnhancedExample</span> <span class="attr">date</span>=<span class="string">&#123;(new</span> <span class="attr">Date</span>)<span class="attr">.toLocaleDateString</span>()&#125;/&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h4 id="抽象state"><a href="#抽象state" class="headerlink" title="抽象state"></a>抽象state</h4><img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/4.jpg">
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">import</span> &#123;stringify&#125; <span class="keyword">from</span> <span class="string">'../ii/ii_debug'</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            email1: <span class="string">''</span>,</span><br><span class="line">            email2: <span class="string">''</span>,</span><br><span class="line">            email3: <span class="string">''</span>,</span><br><span class="line">            email4: <span class="string">''</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">this</span>.onChange1 = <span class="keyword">this</span>.onInputChange1.bind(<span class="keyword">this</span>)</span><br><span class="line">        <span class="keyword">this</span>.onChange2 = <span class="keyword">this</span>.onInputChange2.bind(<span class="keyword">this</span>)</span><br><span class="line">        <span class="keyword">this</span>.onChange3 = <span class="keyword">this</span>.onInputChange3.bind(<span class="keyword">this</span>)</span><br><span class="line">        <span class="keyword">this</span>.onChange4 = <span class="keyword">this</span>.onInputChange4.bind(<span class="keyword">this</span>)</span><br><span class="line">    &#125;</span><br><span class="line">    onInputChange1(e) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            email1: e.target.value</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    onInputChange2(e) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            email2: e.target.value</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    onInputChange3(e) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            email3: e.target.value</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    onInputChange4(e) &#123;</span><br><span class="line">        <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">            email4: e.target.value</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div&gt;</span><br><span class="line">                &lt;h2&gt;</span><br><span class="line">                    Wrapped Component</span><br><span class="line">                &lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;</span></span><br><span class="line"><span class="regexp">                    state</span></span><br><span class="line"><span class="regexp">                &lt;/</span>p&gt;</span><br><span class="line">                &lt;pre&gt;&#123;stringify(<span class="keyword">this</span>.state)&#125;&lt;<span class="regexp">/pre&gt;</span></span><br><span class="line"><span class="regexp">                &lt;form&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;input onChange=&#123;this.onChange1&#125;/</span>&gt;</span><br><span class="line">                    &lt;br /&gt;</span><br><span class="line">                    &lt;input onChange=&#123;<span class="keyword">this</span>.onChange2&#125;/&gt;</span><br><span class="line">                    &lt;br /&gt;</span><br><span class="line">                    &lt;input onChange=&#123;<span class="keyword">this</span>.onChange3&#125;/&gt;</span><br><span class="line">                    &lt;br /&gt;</span><br><span class="line">                    &lt;input onChange=&#123;<span class="keyword">this</span>.onChange4&#125;/&gt;</span><br><span class="line">                &lt;<span class="regexp">/form&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> EnhancedExample = Example</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">EnhancedExample</span> /&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/5.jpg">
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">import</span> &#123;IIHOC <span class="keyword">as</span> DebuggerHOC, stringify&#125; <span class="keyword">from</span> <span class="string">'../ii/ii_debug'</span></span><br><span class="line"><span class="comment">// Props Proxy and state abstraction demonstration</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PPHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">PP</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">        <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">            <span class="keyword">super</span>(props)</span><br><span class="line">            <span class="keyword">this</span>.state = &#123;<span class="attr">fields</span>: &#123;&#125;&#125;</span><br><span class="line">        &#125;</span><br><span class="line">        getField(fieldName) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!<span class="keyword">this</span>.state.fields[fieldName]) &#123;</span><br><span class="line">                <span class="keyword">this</span>.state.fields[fieldName] = &#123;</span><br><span class="line">                    value: <span class="string">''</span>,</span><br><span class="line">                    onChange: <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">                        <span class="keyword">this</span>.state.fields[fieldName].value = event.target.value</span><br><span class="line">                        <span class="keyword">this</span>.forceUpdate()</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                value: <span class="keyword">this</span>.state.fields[fieldName].value,</span><br><span class="line">                onChange: <span class="keyword">this</span>.state.fields[fieldName].onChange</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">const</span> props = <span class="built_in">Object</span>.assign(&#123;&#125;, <span class="keyword">this</span>.props, &#123;</span><br><span class="line">                fields: <span class="keyword">this</span>.getField.bind(<span class="keyword">this</span>),</span><br><span class="line">            &#125;)</span><br><span class="line">            <span class="keyword">return</span> (</span><br><span class="line">                &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid red'</span>, <span class="attr">padding</span>: <span class="string">'0px 30px 30px 30px'</span>&#125;&#125;&gt;</span><br><span class="line">                    &lt;h1&gt;HOC Component&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;WrappedComponent &#123;...props&#125;/</span>&gt;</span><br><span class="line">                &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">            )</span></span><br><span class="line"><span class="regexp">        &#125;</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">class Example extends React.Component &#123;</span></span><br><span class="line"><span class="regexp">    render() &#123;</span></span><br><span class="line"><span class="regexp">        return (</span></span><br><span class="line"><span class="regexp">            &lt;div style=&#123;&#123;border: '2px solid blue'&#125;&#125;&gt;</span></span><br><span class="line"><span class="regexp">                &lt;h2&gt;Wrapped Component&lt;/</span>h2&gt;</span><br><span class="line">                &lt;p&gt;<span class="xml"><span class="tag">&lt;<span class="name">b</span>&gt;</span>Props:<span class="tag">&lt;/<span class="name">b</span>&gt;</span></span><span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;input &#123;...this.props.fields('email1')&#125;/</span>&gt;</span><br><span class="line">                &lt;br /&gt;</span><br><span class="line">                &lt;input &#123;...this.props.fields(<span class="string">'email2'</span>)&#125;/&gt;</span><br><span class="line">                &lt;br /&gt;</span><br><span class="line">                &lt;input &#123;...this.props.fields(<span class="string">'email3'</span>)&#125;/&gt;</span><br><span class="line">                &lt;br /&gt;</span><br><span class="line">                &lt;input &#123;...this.props.fields(<span class="string">'email4'</span>)&#125;/&gt;</span><br><span class="line">                &lt;br /&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">const EnhancedExample = PPHOC(Example)</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 使用高阶组件作为调试器，来调试被包装组件的状态。</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ const EnhancedExample = DebuggerHOC(PPHOC(Example))</span></span><br><span class="line"><span class="regexp">ReactDOM.render(&lt;EnhancedExample date=&#123;(new Date).toLocaleDateString()&#125;/</span>&gt;, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h3 id="反向继承（Inheritance-Inversion）"><a href="#反向继承（Inheritance-Inversion）" class="headerlink" title="反向继承（Inheritance Inversion）"></a>反向继承（Inheritance Inversion）</h3><p>高阶组件 extends wrappedComponent。一般有以下几种用法：渲染劫持（Render Highjacking）、操作State或调试器<br><img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/6.jpg"><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="comment">// Props Proxy demonstration</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">IIHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// return class II extends React.Component &#123;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">II</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">return</span> (<span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&#123;&#123;border:</span> '<span class="attr">2px</span> <span class="attr">solid</span> <span class="attr">red</span>', <span class="attr">padding:</span> '<span class="attr">0px</span> <span class="attr">30px</span> <span class="attr">30px</span> <span class="attr">30px</span>'&#125;&#125;&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">h1</span>&gt;</span>HOC Component<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">b</span>&gt;</span>Props:<span class="tag">&lt;/<span class="name">b</span>&gt;</span><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">b</span>&gt;</span>State:<span class="tag">&lt;/<span class="name">b</span>&gt;</span><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">				<span class="tag">&lt;<span class="name">WrappedComponent</span> &#123;<span class="attr">...this.props</span>&#125;/&gt;</span></span></span><br><span class="line"><span class="xml">				&#123;/* <span class="tag">&lt;<span class="name">WrappedComponent</span> /&gt;</span> */&#125;</span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid blue'</span>&#125;&#125;&gt;</span><br><span class="line">                &lt;h2&gt;Wrapped Component&lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">Example.defaultProps = &#123;</span><br><span class="line">    wrappedProps: <span class="string">'dadabai'</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// const EnhancedExample = Example</span></span><br><span class="line"><span class="keyword">const</span> EnhancedExample = IIHOC(Example)</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">EnhancedExample</span> <span class="attr">date</span>=<span class="string">&#123;(new</span> <span class="attr">Date</span>)<span class="attr">.toLocaleDateString</span>()&#125;/&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure></p>
+<h4 id="渲染劫持（Render-Highjacking）"><a href="#渲染劫持（Render-Highjacking）" class="headerlink" title="渲染劫持（Render Highjacking）"></a>渲染劫持（Render Highjacking）</h4><p>注意：不要在属性代理中渲染劫持，因为你必须在属性代理中模拟虚拟DOM的生命周期，而不是吧虚拟DOM的生命周期交给他原来的方式做。<br><img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/7.jpg"><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">iiHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">Enhancer</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">let</span> childTreeDom</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.props.loggedIn) &#123;</span><br><span class="line">                childTreeDom = <span class="keyword">super</span>.render()</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                childTreeDom = <span class="literal">null</span></span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> (<span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">style</span>=<span class="string">&#123;&#123;border:</span> '<span class="attr">2px</span> <span class="attr">solid</span> <span class="attr">red</span>', <span class="attr">padding:</span> '<span class="attr">0px</span> <span class="attr">30px</span> <span class="attr">30px</span> <span class="attr">30px</span>'&#125;&#125;&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">h1</span>&gt;</span>HOC Component<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">b</span>&gt;</span>Props:<span class="tag">&lt;/<span class="name">b</span>&gt;</span><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">                <span class="tag">&lt;<span class="name">p</span>&gt;</span><span class="tag">&lt;<span class="name">b</span>&gt;</span>State:<span class="tag">&lt;/<span class="name">b</span>&gt;</span><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span><span class="tag">&lt;/<span class="name">p</span>&gt;</span></span></span><br><span class="line"><span class="xml">                &#123;childTreeDom&#125;</span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid blue'</span>&#125;&#125;&gt;</span><br><span class="line">                &lt;h2&gt;Wrapped Component&lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;input /</span>&gt;</span><br><span class="line">            &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">        )</span></span><br><span class="line"><span class="regexp">    &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">const EnhancedExample = iiHOC(Example)</span></span><br><span class="line"><span class="regexp">ReactDOM.render(&lt;EnhancedExample date=&#123;(new Date).toLocaleDateString()&#125; loggedIn=&#123;true&#125;/</span>&gt;, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure></p>
+<img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/8.jpg">
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">iiHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// return class Enhancer extends React.Component &#123;</span></span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">Enhancer</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">		<span class="comment">// componentWillMount()&#123;</span></span><br><span class="line">			</span><br><span class="line">		<span class="comment">// &#125;</span></span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">const</span> elementsTree = <span class="keyword">super</span>.render()</span><br><span class="line">            <span class="comment">// const newComponent = new WrappedComponent()</span></span><br><span class="line">            <span class="comment">// const elementsTree = newComponent.render()</span></span><br><span class="line">            <span class="keyword">let</span> newProps = &#123;&#125;;</span><br><span class="line">            <span class="keyword">if</span> (elementsTree &amp;&amp; elementsTree.type === <span class="string">'input'</span>) &#123;</span><br><span class="line">                newProps = &#123;<span class="attr">value</span>: <span class="string">'may the force be with you'</span>&#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">const</span> props = <span class="built_in">Object</span>.assign(&#123;&#125;, elementsTree.props, newProps)</span><br><span class="line">            <span class="keyword">const</span> newElementsTree = React.cloneElement(elementsTree, props, elementsTree.props.children)</span><br><span class="line">            <span class="keyword">return</span> newElementsTree</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="xml"><span class="tag">&lt;<span class="name">input</span> &gt;</span><span class="tag">&lt;/<span class="name">input</span>&gt;</span></span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// const EnhancedExample = Example</span></span><br><span class="line"><span class="keyword">const</span> EnhancedExample = iiHOC(Example)</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">EnhancedExample</span> <span class="attr">date</span>=<span class="string">&#123;(new</span> <span class="attr">Date</span>)<span class="attr">.toLocaleDateString</span>()&#125;/&gt;</span></span>, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure>
+<h4 id="操作State或调试器"><a href="#操作State或调试器" class="headerlink" title="操作State或调试器"></a>操作State或调试器</h4><p>注意：不要在属性代理中操作state，只能抽象state。要在反向继承中操作state，不要在属性代理中抽象state<br><img src="/blog/2018/12/29/blog/higher-order-components/higher-order-components/9.jpg"><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">replacer</span>(<span class="params">key, value</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> value === <span class="string">'function'</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">`function <span class="subst">$&#123;value.name&#125;</span>() &#123;...&#125;`</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> value</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">stringify</span>(<span class="params">value</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">JSON</span>.stringify(value, replacer, <span class="number">2</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// II debug example</span></span><br><span class="line"><span class="comment">// We are using the Inheritance Inversion technique to display</span></span><br><span class="line"><span class="comment">// the current state and props of the WrappedComponent (the component you want to debug).</span></span><br><span class="line"><span class="comment">// This is based on the technique that Mickael Jackson and Ryan Florence recommend</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">IIHOC</span>(<span class="params">WrappedComponent</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="title">II</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">        render() &#123;</span><br><span class="line">            <span class="keyword">return</span> (</span><br><span class="line">                &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid red'</span>, <span class="attr">padding</span>: <span class="string">'0px 30px 30px 30px'</span>&#125;&#125;&gt;</span><br><span class="line">                    &lt;h1&gt;HOC Debugger Component&lt;<span class="regexp">/h1&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                    &#123;super.render()&#125;</span></span><br><span class="line"><span class="regexp">                &lt;/</span>div&gt;</span><br><span class="line">            )</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Example</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            name: <span class="string">'fran'</span>,</span><br><span class="line">            email: <span class="string">'franleplant@gmail.com'</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;div style=&#123;&#123;<span class="attr">border</span>: <span class="string">'2px solid blue'</span>&#125;&#125;&gt;</span><br><span class="line">                &lt;h2&gt;Wrapped Component&lt;<span class="regexp">/h2&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;Props:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.props)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">                &lt;p&gt;&lt;b&gt;State:&lt;/</span>b&gt;<span class="xml"><span class="tag">&lt;<span class="name">i</span>&gt;</span>&#123;JSON.stringify(this.state)&#125;<span class="tag">&lt;/<span class="name">i</span>&gt;</span></span>&lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">            &lt;/</span>div&gt;</span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> EnhancedExample = IIHOC(Example)</span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">EnhancedExample</span> <span class="attr">date</span>=<span class="string">&#123;(new</span> <span class="attr">Date</span>)<span class="attr">.toLocaleDateString</span>()&#125; <span class="attr">callback</span>=<span class="string">&#123;function</span> <span class="attr">test</span>() &#123;</span></span></span><br><span class="line"><span class="xml">&#125;&#125;/&gt;</span>, <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>))</span><br></pre></td></tr></table></figure></p>
+<h3 id="HOC小结"><a href="#HOC小结" class="headerlink" title="HOC小结"></a>HOC小结</h3><h4 id="约定"><a href="#约定" class="headerlink" title="约定"></a>约定</h4><p>将不相关的props属性传递给包裹组件<br>高阶组件应该传递与它要实现的功能点无关的props属性。<br>向包裹组件注入props属性，一般都是高阶组件的state状态或实例方法。</p>
+<p>最大化使用组合<br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> EnhancedComponent = connect(commentSelector)(withRouter(WrappedComponent))</span><br><span class="line"><span class="keyword">const</span> enhance = compose(connect(commentSelector),withRouter)</span><br><span class="line"><span class="keyword">const</span> EnhancedComponent = enhance(WrappedComponent)</span><br></pre></td></tr></table></figure></p>
+<p>包装显示名字以便于调试<br>当组件应用到高阶组件中后，显示的组件都一致，就无法发区分是那个wrapped组件被高阶组件包装了。所以要显示的指定displayName一般是“高阶组件名称+wrapped组件名称”。</p>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>不要在render函数中使用高阶组件<br>每一次render函数调用都会创建一个新的EnhancedComponent实例。</p>
+<p>必须将静态方法做拷贝<br>当使用高阶组件包装组件，原始组件被容器组件包裹，也就意味着新组件会丢失原始组件的所有静态方法。<br>可以使用hoist-non-react-statics来帮你自动处理，它会自动拷贝所有非React的静态方法。</p>
+<p>refs属性不能传递<br>refs是一个伪属性，React对它进行了特殊处理。<br>如果你向一个由高级组件创建的组件的元素添加ref应用，那么ref指向的是最外层容器组件实例的，而不是包裹组件。<br>React在任何时候都不建议使用ref，如果真的要使用就必须多ref的函数有个清晰的认识，并在在高阶组件中代理实现它。</p>
+<h4 id="推荐用法"><a href="#推荐用法" class="headerlink" title="推荐用法"></a>推荐用法</h4><table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">Props Proxy</th>
+<th style="text-align:center">Inheritance Inversion</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Props</td>
+<td style="text-align:center">建议使用</td>
+<td style="text-align:center">可以使用</td>
+</tr>
+<tr>
+<td style="text-align:center">State</td>
+<td style="text-align:center">建议抽象state</td>
+<td style="text-align:center">建议操作state</td>
+</tr>
+<tr>
+<td style="text-align:center">Ref</td>
+<td style="text-align:center">建议使用</td>
+<td style="text-align:center">可以使用</td>
+</tr>
+<tr>
+<td style="text-align:center">LifeCycle</td>
+<td style="text-align:center">不建议使用</td>
+<td style="text-align:center">建议使用</td>
+</tr>
+</tbody>
+</table>
+<h2 id="扩展延伸"><a href="#扩展延伸" class="headerlink" title="扩展延伸"></a>扩展延伸</h2><h3 id="HOC与设计模式"><a href="#HOC与设计模式" class="headerlink" title="HOC与设计模式"></a>HOC与设计模式</h3><p>代理模式。属性代理就是参照了代理模式实现。<br>装饰者模式。高阶函数的用法就是装饰者模式，它不会破坏原来组件的功能，而是在原来的基础上进行扩展。</p>
+<h3 id="关联阅读"><a href="#关联阅读" class="headerlink" title="关联阅读"></a>关联阅读</h3><p>深入理解 React 高阶组件<br><a href="http://www.jianshu.com/p/0aae7d4d9bc1" target="_blank" rel="noopener">http://www.jianshu.com/p/0aae7d4d9bc1</a></p>
+<p>Facebook对高阶组件的官方文档<br><a href="https://facebook.github.io/react/docs/higher-order-components.html" target="_blank" rel="noopener">https://facebook.github.io/react/docs/higher-order-components.html</a></p>
+<p>Mixins Considered Harmful<br><a href="https://facebook.github.io/react/blog/2016/07/13/mixins-considered-harmful.html" target="_blank" rel="noopener">https://facebook.github.io/react/blog/2016/07/13/mixins-considered-harmful.html</a></p>
+<p>Decorators in ES7<br><a href="http://hackll.com/2015/07/24/decorators-in-es7/%0d" target="_blank" rel="noopener">http://hackll.com/2015/07/24/decorators-in-es7/%0d</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/高阶组件/" rel="tag"># 高阶组件</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2018/06/28/blog/thinking-in-form-engine/thinking-in-form-engine/" rel="next" title="表单引擎设计思想">
+                <i class="fa fa-chevron-left"></i> 表单引擎设计思想
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2019/11/06/blog/thinking-in-react/thinking-in-react/" rel="prev" title="Thinking in React">
+                Thinking in React <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">大大白</p>
+              <p class="site-description motion-element" itemprop="description">沉淀下来的东西，才是真正属于自己的财富！</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#两者的对比"><span class="nav-number">1.</span> <span class="nav-text">两者的对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#React-Mixins"><span class="nav-number">2.</span> <span class="nav-text">React Mixins</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mixins的两种用法"><span class="nav-number">2.1.</span> <span class="nav-text">Mixins的两种用法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#用法一"><span class="nav-number">2.1.1.</span> <span class="nav-text">用法一</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用法二"><span class="nav-number">2.1.2.</span> <span class="nav-text">用法二</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优缺点"><span class="nav-number">2.2.</span> <span class="nav-text">优缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mixins小结"><span class="nav-number">2.3.</span> <span class="nav-text">Mixins小结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#React-HOC"><span class="nav-number">3.</span> <span class="nav-text">React HOC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#属性代理（Props-Proxy）"><span class="nav-number">3.1.</span> <span class="nav-text">属性代理（Props Proxy）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#包装元素（wrapped-elements）"><span class="nav-number">3.1.1.</span> <span class="nav-text">包装元素（wrapped elements）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代理props"><span class="nav-number">3.1.2.</span> <span class="nav-text">代理props</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#通过ref获取组件实例"><span class="nav-number">3.1.3.</span> <span class="nav-text">通过ref获取组件实例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#抽象state"><span class="nav-number">3.1.4.</span> <span class="nav-text">抽象state</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#反向继承（Inheritance-Inversion）"><span class="nav-number">3.2.</span> <span class="nav-text">反向继承（Inheritance Inversion）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#渲染劫持（Render-Highjacking）"><span class="nav-number">3.2.1.</span> <span class="nav-text">渲染劫持（Render Highjacking）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#操作State或调试器"><span class="nav-number">3.2.2.</span> <span class="nav-text">操作State或调试器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HOC小结"><span class="nav-number">3.3.</span> <span class="nav-text">HOC小结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#约定"><span class="nav-number">3.3.1.</span> <span class="nav-text">约定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#注意事项"><span class="nav-number">3.3.2.</span> <span class="nav-text">注意事项</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#推荐用法"><span class="nav-number">3.3.3.</span> <span class="nav-text">推荐用法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#扩展延伸"><span class="nav-number">4.</span> <span class="nav-text">扩展延伸</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#HOC与设计模式"><span class="nav-number">4.1.</span> <span class="nav-text">HOC与设计模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关联阅读"><span class="nav-number">4.2.</span> <span class="nav-text">关联阅读</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大大白</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Gemini</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

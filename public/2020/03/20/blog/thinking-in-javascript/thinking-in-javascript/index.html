@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/blog/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/blog/css/main.css?v=6.4.2" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/blog/images/apple-touch-icon-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/blog/images/favicon-32x32-next.png?v=6.4.2">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/blog/images/favicon-16x16-next.png?v=6.4.2">
+
+
+  <link rel="mask-icon" href="/blog/images/logo.svg?v=6.4.2" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/blog/',
+    scheme: 'Gemini',
+    version: '6.4.2',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="设计模式，我觉得应该分成设计和模式两个东西来看。设计有一些原则，是前辈们不断日积月累总结出的理论，通过对这些理论的综合实践又产生了二十几种的模式。就像java的反射机制一样，javascript也有它独有的特性，那就是原型与原型链、作用域及闭包、异步和单线程。通过结合这些独有的特性所设计实现的代码才能真正体现出javascript的设计模式。">
+<meta name="keywords" content="Javascript设计思想">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Javascript设计思想">
+<meta property="og:url" content="https://ruolong.wang/2020/03/20/blog/thinking-in-javascript/thinking-in-javascript/index.html">
+<meta property="og:site_name" content="大大白的个人博客">
+<meta property="og:description" content="设计模式，我觉得应该分成设计和模式两个东西来看。设计有一些原则，是前辈们不断日积月累总结出的理论，通过对这些理论的综合实践又产生了二十几种的模式。就像java的反射机制一样，javascript也有它独有的特性，那就是原型与原型链、作用域及闭包、异步和单线程。通过结合这些独有的特性所设计实现的代码才能真正体现出javascript的设计模式。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-05-09T15:52:36.850Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Javascript设计思想">
+<meta name="twitter:description" content="设计模式，我觉得应该分成设计和模式两个东西来看。设计有一些原则，是前辈们不断日积月累总结出的理论，通过对这些理论的综合实践又产生了二十几种的模式。就像java的反射机制一样，javascript也有它独有的特性，那就是原型与原型链、作用域及闭包、异步和单线程。通过结合这些独有的特性所设计实现的代码才能真正体现出javascript的设计模式。">
+
+
+
+
+
+
+  <link rel="canonical" href="https://ruolong.wang/2020/03/20/blog/thinking-in-javascript/thinking-in-javascript/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Javascript设计思想 | 大大白的个人博客</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/blog/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">大大白的个人博客</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">人生就像一场旅行，身体和灵魂总有一个要在路上！</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/blog/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/blog/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+    <a href="/blog/tags/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+    <a href="/blog/categories/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works1">
+    <a href="/blog/works1/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>H5小游戏1</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-works2">
+    <a href="/blog/works2/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-calendar"></i> <br>H5小游戏2</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-fiction">
+    <a href="/blog/fiction/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>大将军归来</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+    <a href="/blog/about/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ruolong.wang/blog/2020/03/20/blog/thinking-in-javascript/thinking-in-javascript/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="大大白">
+      <meta itemprop="description" content="沉淀下来的东西，才是真正属于自己的财富！">
+      <meta itemprop="image" content="/blog/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="大大白的个人博客">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Javascript设计思想
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2020-03-20 12:00:00" itemprop="dateCreated datePublished" datetime="2020-03-20T12:00:00+08:00">2020-03-20</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2020-05-09 23:52:36" itemprop="dateModified" datetime="2020-05-09T23:52:36+08:00">2020-05-09</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/" itemprop="url" rel="index"><span itemprop="name">WEB前端</span></a></span>
+
+                
+                
+                  ，
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/blog/categories/WEB前端/设计思想/" itemprop="url" rel="index"><span itemprop="name">设计思想</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>设计模式，我觉得应该分成设计和模式两个东西来看。设计有一些原则，是前辈们不断日积月累总结出的理论，通过对这些理论的综合实践又产生了二十几种的模式。<br>就像java的反射机制一样，javascript也有它独有的特性，那就是原型与原型链、作用域及闭包、异步和单线程。通过结合这些独有的特性所设计实现的代码才能真正体现出javascript的设计模式。</p>
+<a id="more"></a>
+<h2 id="设计原则"><a href="#设计原则" class="headerlink" title="设计原则"></a>设计原则</h2><p>设计原则这个比较通用，无论是什么编程语言，他们想要描述的最佳实践的思想是比较类似的，所以这部分的概念是比较统一的。</p>
+<h3 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h3><h4 id="单一职责原则（Single-Responsibility-Principle）"><a href="#单一职责原则（Single-Responsibility-Principle）" class="headerlink" title="单一职责原则（Single Responsibility Principle）"></a>单一职责原则（Single Responsibility Principle）</h4><p>一个类应该只有一个发生变化的原因。类的复杂性降低，可读性提高。类、函数和接口都要要遵循单一职责原则。遵守单一职责原则，将不同的职责封装到不同的类或模块中。</p>
+<h4 id="开闭原则（Open-Close-Principle）"><a href="#开闭原则（Open-Close-Principle）" class="headerlink" title="开闭原则（Open Close Principle）"></a>开闭原则（Open Close Principle）</h4><p>一个软件实体，如类、模块和函数应该对扩展开放，对修改关闭。稳定，灵活，可扩展。</p>
+<h4 id="里氏替换原则（Liskov-Substitution-Principle）"><a href="#里氏替换原则（Liskov-Substitution-Principle）" class="headerlink" title="里氏替换原则（Liskov Substitution Principle）"></a>里氏替换原则（Liskov Substitution Principle）</h4><p>所有引用基类的地方必须能透明地使用其子类的对象。用父类定义，用子类赋值。超类存在的地方，子类是可以替换的。子类继承了父类的方法，同时子类还可以扩展自己的方法。面向对象的语言的三大特点是继承、封装、多态，里氏替换原则就是依赖于继承、多态这两大特性。</p>
+<h4 id="接口隔离原则（Interface-Segregation-Principle）"><a href="#接口隔离原则（Interface-Segregation-Principle）" class="headerlink" title="接口隔离原则（Interface Segregation Principle）"></a>接口隔离原则（Interface Segregation Principle）</h4><p>客户端不应该依赖它不需要的接口。应当为客户端提供尽可能小的单独的接口，而不是提供大的总的接口。使用多个专门的接口比使用单一的总接口要好。</p>
+<h4 id="迪米特法则（Law-Of-Demeter）"><a href="#迪米特法则（Law-Of-Demeter）" class="headerlink" title="迪米特法则（Law Of Demeter）"></a>迪米特法则（Law Of Demeter）</h4><p>又叫最少知识原则，一个软件实体应当尽可能少的与其他实体发生相互作用。只与你的直接朋友交谈，不跟“陌生人”说话。</p>
+<h4 id="依赖倒置原则（Dependence-Inversion-Principle）"><a href="#依赖倒置原则（Dependence-Inversion-Principle）" class="headerlink" title="依赖倒置原则（Dependence Inversion Principle）"></a>依赖倒置原则（Dependence Inversion Principle）</h4><p>实现尽量依赖抽象，不依赖具体实现。上层模块不应该依赖底层模块，它们都应该依赖于抽象。抽象不应该依赖于细节，细节应该依赖于抽象。</p>
+<h4 id="组合-聚合复用原则（Composite-Aggregate-Reuse-Principle-CARP）"><a href="#组合-聚合复用原则（Composite-Aggregate-Reuse-Principle-CARP）" class="headerlink" title="组合/聚合复用原则（Composite/Aggregate Reuse Principle CARP）"></a>组合/聚合复用原则（Composite/Aggregate Reuse Principle CARP）</h4><p>尽量使用合成/聚合达到复用，尽量少用继承。一个类中有另一个类的对象。对比继承子类会被父类污染。但是如果是非常明确的一定必须要有的，继承依然可以使用。组合比较灵活。</p>
+<h3 id="我的理解"><a href="#我的理解" class="headerlink" title="我的理解"></a>我的理解</h3><h4 id="单一职责原则（Single-Responsibility-Principle）-1"><a href="#单一职责原则（Single-Responsibility-Principle）-1" class="headerlink" title="单一职责原则（Single Responsibility Principle）"></a>单一职责原则（Single Responsibility Principle）</h4><p>有一个需求用户输入email之后可以点击＋在添加一个email输入框继续添加。这个可以做成两个独立的组件，一个email，一个appendContainer。他们的职责很简单，emial可以用来提供用户输入email还有输入框的基本样式。而appendContainer则用来复制创建子元素，并把数据准确的传递给指定的元素。<br>比如常用的radio组件，一个是button，另一个是group。其实很简单就是一个选中操作，但是经常会有需求出现一个group中只能选中一个radio，在这里会分成两个组件。一个是radio很简单就是一个render组件，另一个是控制子节点选中的状态，也很简单用来维护状态就行了。</p>
+<h4 id="开闭原则（Open-Close-Principle）-1"><a href="#开闭原则（Open-Close-Principle）-1" class="headerlink" title="开闭原则（Open Close Principle）"></a>开闭原则（Open Close Principle）</h4><p>在外部可以很方面的修改item的渲染方式，看是要做成左右结构还是上下结构。这个符合开闭原则。<br>组件通信，字段之间的关联关系。通过dependencies，中介者模式。引擎把组件之间需要互相调用的所有数据都传递出去给中介者，用户可以在中介者里面修改组件如何通讯。比如说一个评分组件可以评1~5分，1分和5分要说明原因所以会出现一个textarea的组件，2-4分不用说明原因。那么引擎不能把这个逻辑直接实现，而是把组件之间的状态都传递出去，给用户自己去实现。不然将来万一要变就会导致需要重新修改引擎，所以引擎把重心放在组件的数据状态传递出去，给用户自己实现，因为需要控制的权限已经在IoC容器里面，完全可以达到目的。</p>
+<h4 id="里氏替换原则（Liskov-Substitution-Principle）-1"><a href="#里氏替换原则（Liskov-Substitution-Principle）-1" class="headerlink" title="里氏替换原则（Liskov Substitution Principle）"></a>里氏替换原则（Liskov Substitution Principle）</h4><p>父类定义子类赋值。用BaseContainer定义了变量，在具体实现的时候指定了具体的TableContainer，ListContainer，AppendContainer。<br>容器类，都需要渲染this.props.children，但是不容的容器对children渲染方式都不一样，比如List容器，Tabs容器。因此我们定义了baseContainer基类实现了渲染children的方法，然后ListContainer和TabsContainer去继承这个基类，定义自己的渲染方式。基类只是把children渲染出来，子类则是定义了渲染后如何展示。</p>
+<h4 id="接口隔离原则（Interface-Segregation-Principle）-1"><a href="#接口隔离原则（Interface-Segregation-Principle）-1" class="headerlink" title="接口隔离原则（Interface Segregation Principle）"></a>接口隔离原则（Interface Segregation Principle）</h4><p>和服务端接口交互尽量小而单独，而不是大而总的接口。tab组件有3个列表待使用，待审核，已完成。点击按钮之后跳转到第2个列表的第1项。那这时候应该是提供两个接口，一个是切换tab的，另一个是选中列表项的，而不是一个接口全部搞定。<br>比如tab切换后要选中第1项，那么我会提供两个接口来给外部调用，一个是切换tab，另一个是选中第1项。</p>
+<h4 id="迪米特法则（Law-Of-Demeter）-1"><a href="#迪米特法则（Law-Of-Demeter）-1" class="headerlink" title="迪米特法则（Law Of Demeter）"></a>迪米特法则（Law Of Demeter）</h4><p>最少知道原则。在组件通信的时候引擎认为只要把这些组件运行时的状态和数据抛出去就行了，剩下的由开发人员去做，引擎不用关心怎么做，只要做好自己的事情就好了。<br>dependencies从开发人员的角度出发是开闭原则，从引擎的角度出发是迪米特法则。还有类似的比如状态模式。我只要能访问调用它的方法就好了，至于它里面是怎么做的我并不关心。</p>
+<h4 id="依赖倒置原则（Dependence-Inversion-Principle）-1"><a href="#依赖倒置原则（Dependence-Inversion-Principle）-1" class="headerlink" title="依赖倒置原则（Dependence Inversion Principle）"></a>依赖倒置原则（Dependence Inversion Principle）</h4><p>List组件里面的item在实现的时候应该依赖于抽象，而不是具体的把item实现成某个布局。这个符合依赖倒置。<br>List容器依赖抽象实现，在map循环数组的时候把renderItem放给外面，给外面定义，本身只是抽象的调用了renderItem方法表示在这个位置会有一个Item。因为Item可能会有上下结构，也可能会有左右结构，可能会有图片按钮，这些要放给外面去实现。而不能具体的把这个item就直接实现成左右或者上下结构，这样当用户需要修改的时候就无法修改变成重新复制一份出来修改。</p>
+<h2 id="模式"><a href="#模式" class="headerlink" title="模式"></a>模式</h2><h3 id="基本概念-1"><a href="#基本概念-1" class="headerlink" title="基本概念"></a>基本概念</h3><h4 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h4><p>这些设计模式提供了一种在创建对象的同时隐藏创建逻辑的方式，而不是使用 new 运算符直接实例化对象。这使得程序在判断针对某个给定实例需要创建哪些对象时更加灵活。<br>工厂模式（Factory Pattern）<br>抽象工厂模式（Abstract Factory Pattern）<br>单例模式（Singleton Pattern）<br>建造者模式（Builder Pattern）<br>原型模式（Prototype Pattern）</p>
+<h4 id="结构型模式"><a href="#结构型模式" class="headerlink" title="结构型模式"></a>结构型模式</h4><p>这些设计模式关注类和对象的组合。继承的概念被用来组合接口和定义组合对象获得新功能的方式。<br>适配器模式（Adapter Pattern）<br>桥接模式（Bridge Pattern）<br>过滤器模式（Filter、Criteria Pattern）<br>组合模式（Composite Pattern）<br>装饰器模式（Decorator Pattern）<br>外观模式（Facade Pattern）<br>享元模式（Flyweight Pattern）<br>代理模式（Proxy Pattern）</p>
+<h4 id="行为型模式"><a href="#行为型模式" class="headerlink" title="行为型模式"></a>行为型模式</h4><p>这些设计模式特别关注对象之间的通信。<br>责任链模式（Chain of Responsibility Pattern）<br>命令模式（Command Pattern）<br>解释器模式（Interpreter Pattern）<br>迭代器模式（Iterator Pattern）<br>中介者模式（Mediator Pattern）<br>备忘录模式（Memento Pattern）<br>观察者模式（Observer Pattern）<br>状态模式（State Pattern）<br>空对象模式（Null Object Pattern）<br>策略模式（Strategy Pattern）<br>模板模式（Template Pattern）<br>访问者模式（Visitor Pattern）</p>
+<h3 id="我的理解-1"><a href="#我的理解-1" class="headerlink" title="我的理解"></a>我的理解</h3><h4 id="观察者模式和发布订阅模式"><a href="#观察者模式和发布订阅模式" class="headerlink" title="观察者模式和发布订阅模式"></a>观察者模式和发布订阅模式</h4><p>他们最大的区别就是发布订阅模式有个事件调度中心，他们的联系是发布订阅模式是观察者模式的一种实现，发布订阅模式是广义上的观察者模式。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// pubSub.js</span></span><br><span class="line"><span class="keyword">import</span> emitter <span class="keyword">from</span> <span class="string">'utils/eventUtil'</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 发布订阅模式</span></span><br><span class="line"><span class="comment"> * 可以用来处理setState，但是不能用来处理调用对象的方法。这个还需完善，可以考虑用IOC容器。</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param <span class="type">&#123;*&#125;</span> <span class="variable">subscriberKey</span></span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">PubSub</span>(<span class="params">subscriberKey</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="params">WrappedComponent</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">      <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">      &#125;</span><br><span class="line">      componentDidMount() &#123;</span><br><span class="line">        <span class="keyword">super</span>.componentDidMount &amp;&amp; <span class="keyword">super</span>.componentDidMount()</span><br><span class="line">        <span class="keyword">this</span>.eventEmitter = emitter.addListener(subscriberKey, <span class="keyword">this</span>.apiSetState)</span><br><span class="line">      &#125;</span><br><span class="line">      apiSetState = <span class="function">(<span class="params">&#123; key, value &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">super</span>.setState(&#123;</span><br><span class="line">          [key]: value,</span><br><span class="line">        &#125;)</span><br><span class="line">      &#125;</span><br><span class="line">      componentWillUnmount() &#123;</span><br><span class="line">        <span class="keyword">super</span>.componentWillUnmount &amp;&amp; <span class="keyword">super</span>.componentWillUnmount()</span><br><span class="line">        emitter.removeListener(subscriberKey, <span class="keyword">this</span>.apiSetState)</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> PubSub</span><br><span class="line"></span><br><span class="line"><span class="comment">// eventUtil.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; EventEmitter &#125; <span class="keyword">from</span> <span class="string">'events'</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">new</span> EventEmitter()</span><br><span class="line"></span><br><span class="line"><span class="comment">// sidebar.js</span></span><br><span class="line">@PubSub(<span class="string">'SideBar.setState'</span>)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">SideBar</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>()&#123;</span><br><span class="line">    <span class="keyword">this</span>.state=&#123;</span><br><span class="line">      xxx:<span class="literal">false</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// folderItem.js</span></span><br><span class="line"><span class="keyword">import</span> emitter <span class="keyword">from</span> <span class="string">'utils/eventUtil'</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">FolderItem</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">  selectedDocType = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      emitter.emit(<span class="string">'SideBar.setState'</span>, &#123;<span class="attr">key</span>: <span class="string">'xxx'</span>, <span class="attr">value</span>: <span class="literal">false</span>&#125;)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="代理模式与面向切面"><a href="#代理模式与面向切面" class="headerlink" title="代理模式与面向切面"></a>代理模式与面向切面</h4><p>面向切面编程其实就是代理模式<br>表单引擎在预编译的时候把this._onChange与this._aop绑定在一起，在onChange运行时的时候才真正去触发this._aop中的方法。这就相当于是一个表达式还没有真正执行。<br>面向切面编程，通过预编译方式和运行期动态代理实现程序功能的统一维护的一种技术。每个组件把自己转交给IoC容器，然后继承BaseComponent在切面中编写代码。实例化IoC容器，并且把组件注入到容器中。绑定aop切面，让子类可以方便的使用aop切面。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//BaseComponent包含了IoC容器，还有一个用于拦截组件行为的方法</span></span><br><span class="line"><span class="keyword">export</span> <span class="class"><span class="keyword">class</span> <span class="title">BaseComponent</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">static</span> displayName = <span class="string">'BaseComponent'</span></span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.IoC = IoC.getInstance()</span><br><span class="line">    &#125;</span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.props.displayName &amp;&amp; <span class="keyword">this</span>.props.displayName !== <span class="string">'undefined'</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!(<span class="keyword">this</span>.props.displayName.indexOf(<span class="string">'FormEngine'</span>) &gt; <span class="number">-1</span>)) &#123;</span><br><span class="line">                <span class="keyword">this</span>.IoC.injection(<span class="keyword">this</span>.props.displayName, <span class="keyword">this</span>)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    aop = <span class="function">(<span class="params">...args</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.props.AOP(...args)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="class"><span class="keyword">class</span> <span class="title">A</span> <span class="keyword">extends</span> <span class="title">BaseComponent</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props)</span><br><span class="line">        <span class="keyword">this</span>.state = &#123;</span><br><span class="line">            value: <span class="number">1</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    confirm = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">this</span>.props.submitData(<span class="keyword">this</span>.state.value)</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (<span class="xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">onClick</span>=<span class="string">&#123;this._aop.bindArgs(this._confirm,</span> <span class="attr">this</span>)&#125;&gt;</span>xxx<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用者无权访问目标对象，中间加代理，通过代理做权限和控制。就类似AOP切面编程。<br>适配器提供不同的接口；代理模式提供一模一样的接口。<br>代理模式显示原有功能但是经过限制或者阉割之后的；装饰器扩展功能原有功能不变不冲突可以直接使用<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ReadImg</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(fileName)&#123;</span><br><span class="line">    <span class="keyword">this</span>.fileName = fileName</span><br><span class="line">    <span class="keyword">this</span>.loadFromDisk()</span><br><span class="line">  &#125;</span><br><span class="line">  display()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'display...'</span>,<span class="keyword">this</span>.fileName)</span><br><span class="line">  &#125;</span><br><span class="line">  loadFormDisk()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'loading...'</span>,<span class="keyword">this</span>.fileName)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ProxyImg</span> </span>&#123;</span><br><span class="line">  construtor(fileName)&#123;</span><br><span class="line">    <span class="keyword">this</span>.realImg = <span class="keyword">new</span> RedImg(fileName)</span><br><span class="line">  &#125;</span><br><span class="line">  display()&#123;</span><br><span class="line">    <span class="keyword">this</span>.realImg.display()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="访问者模式与控制反转"><a href="#访问者模式与控制反转" class="headerlink" title="访问者模式与控制反转"></a>访问者模式与控制反转</h4><p>控制反转就是把原来自己控制的权限转交给外部控制的过程叫做控制反转，也叫控制转移。<br>依赖注入就是把控制权转交出去，依赖查找就是外部容器控制这个对象。<br>控制反转其实和中介者模式比较像。组件之间不再互相通信互相影响，而是通过一个中介者去调配处理这些组件之间的关系。<br>这是为了解决跨多层级组件之间的通讯的问题。组件的数据没有在 redux 中维护，而是在 state 中。组件内部特定的方法。</p>
+<p>场景：文章列表组件 Articles，他们归属于同一个分类。点击分类按钮，打开侧边栏分类列表组件 Categories，分类列表顶部有一个搜索框 Input 用来搜索分类，点击分类 CategoryItem 后刷新文章列表。</p>
+<p>需求：选中某个分类，关闭侧边栏，清空 Input 框。这要求 Articles、Input 的数据都要从 redux 存取。当选中 CategoryItem 后，同时设置 Articles 和 Input 的数据。但是 Input 只不过是一个普通的输入框却要绕一大圈到 redux 里面，如果 Input 不在 redux 存储，这个需求将很难完成。<br>这时候 IoC 体现出了价值，它可以把 Categories 放入 IoC 容器中，在 CategoryItem 里面去调用 Categories 的方法来清空 Input。因为在实际开发中 Input 受控方式直接在 state 是最方便的。</p>
+<p>总的来说，适用于以下这种场景。由 state 控制的，或者是组件内部的方法，没办法通过 callback，或者修改 redux 就可以实现的。</p>
+<p>比如一个 List 组件，里面的数据已经是一个完整的对象，当打开单个 Item 的时候不需要再请求一次，因此这个 Item 的 data 经常会被放在 state 维护。但是当 Modal 弹出框后需要修改这个 data，问题就出现了。因为你虽然更新了 redux，但是当前 modal 里面的数据却是在父容器的 state 中，所以这时候无法和新数据保持一致。当然这种情况可以用 callback 的方式解决，就是当更新完数据之后调用一个 callback 把最新的值 set 回来。</p>
+<p>getData()、renderItem()调用外部的方法。实现的方式依赖于抽象而不是具体。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IoC</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>() &#123;</span><br><span class="line">        <span class="keyword">this</span>.context = &#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">static</span> getInstance() &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">this</span>.instance) &#123;</span><br><span class="line">            <span class="keyword">this</span>.instance = <span class="keyword">new</span> IoC()</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.instance</span><br><span class="line">    &#125;</span><br><span class="line">    injection(key, component) &#123;</span><br><span class="line">        <span class="keyword">this</span>.context[key] = component</span><br><span class="line">    &#125;</span><br><span class="line">    lookup(key) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.context[key]</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 容器</span></span><br><span class="line"><span class="keyword">const</span> ctx = &#123;&#125;;</span><br><span class="line"><span class="comment">// 把组件注入到容器</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">CTRL</span>(<span class="params">subscriberKey</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="params">WrappedComponent</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="class"><span class="keyword">class</span> <span class="keyword">extends</span> <span class="title">WrappedComponent</span> </span>&#123;</span><br><span class="line">      <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="keyword">super</span>(props);</span><br><span class="line">      &#125;</span><br><span class="line">      componentDidMount() &#123;</span><br><span class="line">        <span class="keyword">super</span>.componentDidMount &amp;&amp; <span class="keyword">super</span>.componentDidMount();</span><br><span class="line">        ctx[subscriberKey] = <span class="keyword">this</span>;</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      componentWillUnmount() &#123;</span><br><span class="line">        <span class="keyword">super</span>.componentWillUnmount &amp;&amp; <span class="keyword">super</span>.componentWillUnmount();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> &#123; CTRL, ctx &#125;;</span><br></pre></td></tr></table></figure>
+<h4 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h4><p>由于所有的组件都要互相通讯，所以必须保证所有的组件都在同一个容器中，所以使用单例模式创建IoC容器。<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Sequence</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (!Sequence.instance) &#123;</span><br><span class="line">    <span class="keyword">var</span> privateIndex = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">this</span>.next = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> ++privateIndex;</span><br><span class="line">    &#125;;</span><br><span class="line">    Sequence.instance = <span class="keyword">this</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> Sequence.instance;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="原型模式"><a href="#原型模式" class="headerlink" title="原型模式"></a>原型模式</h4><p><code>Object.create()</code><br>对比js中的prototype，prototype是es6 class底层实现的原理<br>Object.create()和new Object()的区别<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> prototype = &#123;</span><br><span class="line">  getName: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.first + <span class="string">' '</span> + <span class="keyword">this</span>.last</span><br><span class="line">  &#125;</span><br><span class="line">  say: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    alert(<span class="string">'hello'</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> x = <span class="built_in">Object</span>.create(prototype)</span><br><span class="line">x.first = <span class="string">'A'</span></span><br><span class="line">x.last = <span class="string">'B'</span></span><br></pre></td></tr></table></figure></p>
+<h4 id="模块模式"><a href="#模块模式" class="headerlink" title="模块模式"></a>模块模式</h4><p>充分利用了闭包的特性</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Counter = (<span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> privateCounter = <span class="number">0</span>;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">changeBy</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    privateCounter += val;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    increment: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      changeBy(<span class="number">1</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    decrement: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      changeBy(<span class="number">-1</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    value: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> privateCounter;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;   </span><br><span class="line">&#125;)();</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(Counter.value()); <span class="comment">/* logs 0 */</span></span><br><span class="line">Counter.increment();</span><br><span class="line">Counter.increment();</span><br><span class="line"><span class="built_in">console</span>.log(Counter.value()); <span class="comment">/* logs 2 */</span></span><br><span class="line">Counter.decrement();</span><br><span class="line"><span class="built_in">console</span>.log(Counter.value()); <span class="comment">/* logs 1 */</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> makeCounter = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> privateCounter = <span class="number">0</span>;</span><br><span class="line">  <span class="function"><span class="keyword">function</span> <span class="title">changeBy</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">    privateCounter += val;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    increment: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      changeBy(<span class="number">1</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    decrement: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      changeBy(<span class="number">-1</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">    value: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> privateCounter;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;  </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> Counter1 = makeCounter();</span><br><span class="line"><span class="keyword">var</span> Counter2 = makeCounter();</span><br><span class="line"><span class="built_in">console</span>.log(Counter1.value()); <span class="comment">/* logs 0 */</span></span><br><span class="line">Counter1.increment();</span><br><span class="line">Counter1.increment();</span><br><span class="line"><span class="built_in">console</span>.log(Counter1.value()); <span class="comment">/* logs 2 */</span></span><br><span class="line">Counter1.decrement();</span><br><span class="line"><span class="built_in">console</span>.log(Counter1.value()); <span class="comment">/* logs 1 */</span></span><br><span class="line"><span class="built_in">console</span>.log(Counter2.value()); <span class="comment">/* logs 0 */</span></span><br></pre></td></tr></table></figure>
+<h4 id="状态模式"><a href="#状态模式" class="headerlink" title="状态模式"></a>状态模式</h4><p>一个对象有状态变化<br>每个状态变化都有很多逻辑处理</p>
+<p>有限状态机javascript-state-machine<br>promise就是一个状态模式<br>promise基本特性</p>
+<ol>
+<li>promise是一个class</li>
+<li>promise初始化的时候要传入函数</li>
+<li>传入的函数要有两个参数一个resolve另一个是reject</li>
+<li>实现.then方法有两个参数，成功了执行第一个参数，失败了执行第二个参数</li>
+</ol>
+<p>promis三种状态：pending fullfilled rejected<br>pending-&gt;fullfilled 或者pending-&gt;rejected<br>不可逆向变化</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> StateMachine <span class="keyword">from</span> <span class="string">'javascript-state-machine'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> fsm = <span class="keyword">new</span> StateMachine(&#123;</span><br><span class="line">  init: <span class="string">'pending'</span>,<span class="comment">//初始化状态</span></span><br><span class="line">  transitions:[</span><br><span class="line">    &#123;</span><br><span class="line">      name:<span class="string">'resolve'</span>,</span><br><span class="line">      <span class="keyword">from</span>:<span class="string">'pending'</span>,</span><br><span class="line">      to:<span class="string">'fullfilled'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      name:<span class="string">'reject'</span>,</span><br><span class="line">      <span class="keyword">from</span>:<span class="string">'pending'</span>,</span><br><span class="line">      to:<span class="string">'rejected'</span></span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">  methods: &#123;</span><br><span class="line">    onResolve: <span class="function"><span class="keyword">function</span>(<span class="params">state,data</span>)</span>&#123;</span><br><span class="line">      <span class="comment">// state 当前状态机实例；data fsm.resolve(xxx)</span></span><br><span class="line">    &#125;，</span><br><span class="line">    onReject: <span class="function"><span class="keyword">function</span>(<span class="params">state, data</span>)</span>&#123;</span><br><span class="line">      <span class="comment">// state 当前状态机实例；data fsm.reject(xxx)</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义promise</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyPromise</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(fn)&#123;</span><br><span class="line">    <span class="keyword">this</span>.successList=[]</span><br><span class="line">    <span class="keyword">this</span>.failList=[]</span><br><span class="line">    fn(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      <span class="comment">//resolve函数</span></span><br><span class="line">      fsm.resolve(<span class="keyword">this</span>)</span><br><span class="line">    &#125;,<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      <span class="comment">//reject函数</span></span><br><span class="line">      fsm.reject(<span class="keyword">this</span>)</span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;</span><br><span class="line">  then(successFn,failFn)&#123;</span><br><span class="line">    <span class="keyword">this</span>.successList.push(successFn)</span><br><span class="line">    <span class="keyword">this</span>.failList.push(failFn)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">loadImg</span>(<span class="params">src</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">const</span> promise = <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="keyword">function</span>(<span class="params">resolve,reject</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">let</span> img=<span class="built_in">document</span>.createElement(<span class="string">'img'</span>)</span><br><span class="line">    img.onload=<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      resolve(img)</span><br><span class="line">    &#125;</span><br><span class="line">    img.onerror=<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">      reject()</span><br><span class="line">    &#125;</span><br><span class="line">    img.src=src</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> src=<span class="string">''</span></span><br><span class="line"><span class="keyword">let</span> result = loadImg(src)</span><br><span class="line">result.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'ok1'</span>)</span><br><span class="line">&#125;,<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'fail1'</span>)</span><br><span class="line">&#125;)</span><br><span class="line">result.then(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'ok2'</span>)</span><br><span class="line">&#125;,<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'fail2'</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+<h4 id="模板模式"><a href="#模板模式" class="headerlink" title="模板模式"></a>模板模式</h4><p>封装一个统一对外的方法<br>并发或顺序执行<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Action</span></span>&#123;</span><br><span class="line">  handle()&#123;</span><br><span class="line">    handle1()</span><br><span class="line">    handle2()</span><br><span class="line">    handle3()</span><br><span class="line">  &#125;</span><br><span class="line">  handle1()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">1</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  handle2()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">2</span>)</span><br><span class="line">  &#125;</span><br><span class="line">  handle3()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="number">3</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="命令模式"><a href="#命令模式" class="headerlink" title="命令模式"></a>命令模式</h4><p>document.execCommand(‘bold’)<br>document.execCommand(‘undo’)<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Receiver</span>()</span>&#123;</span><br><span class="line">  exec()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'执行'</span>)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 命令者</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Command</span>()</span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(receiver)&#123;</span><br><span class="line">    <span class="keyword">this</span>.receiver=receiver</span><br><span class="line">  &#125;</span><br><span class="line">  cmd()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'执行命令'</span>)</span><br><span class="line">    <span class="keyword">this</span>.receiver.exec()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Invoker</span>()</span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(command)&#123;</span><br><span class="line">    <span class="keyword">this</span>.command = command</span><br><span class="line">  &#125;</span><br><span class="line">  invoke()&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'开始'</span>)</span><br><span class="line">    <span class="keyword">this</span>.command.cmd()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="备忘录模式"><a href="#备忘录模式" class="headerlink" title="备忘录模式"></a>备忘录模式</h4><p>随时记录一个对象的状态变化，随时恢复之前的某个功能<br><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Memento</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(content)&#123;</span><br><span class="line">    <span class="keyword">this</span>.conetnt = content</span><br><span class="line">  &#125;</span><br><span class="line">  getContent()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.content</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CareTaker</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>()&#123;</span><br><span class="line">    <span class="keyword">this</span>.list = []</span><br><span class="line">  &#125;</span><br><span class="line">  add(mement)&#123;</span><br><span class="line">    <span class="keyword">this</span>.list.push(mement)</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">get</span>(i)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.list[i]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Editor</span></span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>()&#123;</span><br><span class="line">    <span class="keyword">this</span>.content=<span class="literal">null</span></span><br><span class="line">  &#125;</span><br><span class="line">  setContent(content)&#123;</span><br><span class="line">    <span class="keyword">this</span>.content=content</span><br><span class="line">  &#125;</span><br><span class="line">  getContent()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.content</span><br><span class="line">  &#125;</span><br><span class="line">  saveContentToMementto()&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Memento(<span class="keyword">this</span>.content)</span><br><span class="line">  &#125;</span><br><span class="line">  getcontentFromMemeto(memento)&#123;</span><br><span class="line">    <span class="keyword">this</span>.content = memento.getContent()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="其他待整理"><a href="#其他待整理" class="headerlink" title="其他待整理"></a>其他待整理</h4><p>迭代器模式<br>顺序访问一个集合<br>使用者无需知道集合的内部结构<br>ES6 Iterator</p>
+<p>装饰器模式。<br>就类似高阶函数。core-decorator封装了大量的装饰器。高阶函数，返回函数的闭包。</p>
+<p>中介者模式。<br>通过dependencies把状态传出去。</p>
+<p>外观模式<br>注意：不符合S I，需要谨慎使用，不可滥用。</p>
+<p>桥接模式<br>实现和抽象分离<br>符合开闭原则</p>
+<p>组合模式<br>vnode的实现方式</p>
+<p>享元模式<br>共享元数据<br>共享内存（主要考虑内存，而非效率）<br>相同的数据，共享使用<br>无限下拉列表，将事件代理到高层节点，不然列表元素要是很多的话会绑定很多事件占用很多内存。像menu，tab这些组件都是这个思想</p>
+<p>策略模式<br>不同的策略分开处理，避免出现大量的if…else或者switch…case</p>
+<p>职责链模式<br>顺序执行,promise.then链式操作</p>
+<p>访问者模式<br>将数据操作和数据结构进行分离</p>
+<p>解释器模式<br>描述语言语法如何定义，如何解释和编译</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/blog/tags/Javascript设计思想/" rel="tag"># Javascript设计思想</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2019/12/24/blog/source-code-mirrorjs/source-code-mirrorjs/" rel="next" title="MirrorJS源码解读">
+                <i class="fa fa-chevron-left"></i> MirrorJS源码解读
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2020/03/24/blog/source-code-redux/source-code-redux/" rel="prev" title="Redux源码解读">
+                Redux源码解读 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">大大白</p>
+              <p class="site-description motion-element" itemprop="description">沉淀下来的东西，才是真正属于自己的财富！</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/blog/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/blog/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/blog/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#设计原则"><span class="nav-number">1.</span> <span class="nav-text">设计原则</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念"><span class="nav-number">1.1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#单一职责原则（Single-Responsibility-Principle）"><span class="nav-number">1.1.1.</span> <span class="nav-text">单一职责原则（Single Responsibility Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#开闭原则（Open-Close-Principle）"><span class="nav-number">1.1.2.</span> <span class="nav-text">开闭原则（Open Close Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#里氏替换原则（Liskov-Substitution-Principle）"><span class="nav-number">1.1.3.</span> <span class="nav-text">里氏替换原则（Liskov Substitution Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#接口隔离原则（Interface-Segregation-Principle）"><span class="nav-number">1.1.4.</span> <span class="nav-text">接口隔离原则（Interface Segregation Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#迪米特法则（Law-Of-Demeter）"><span class="nav-number">1.1.5.</span> <span class="nav-text">迪米特法则（Law Of Demeter）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#依赖倒置原则（Dependence-Inversion-Principle）"><span class="nav-number">1.1.6.</span> <span class="nav-text">依赖倒置原则（Dependence Inversion Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#组合-聚合复用原则（Composite-Aggregate-Reuse-Principle-CARP）"><span class="nav-number">1.1.7.</span> <span class="nav-text">组合/聚合复用原则（Composite/Aggregate Reuse Principle CARP）</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我的理解"><span class="nav-number">1.2.</span> <span class="nav-text">我的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#单一职责原则（Single-Responsibility-Principle）-1"><span class="nav-number">1.2.1.</span> <span class="nav-text">单一职责原则（Single Responsibility Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#开闭原则（Open-Close-Principle）-1"><span class="nav-number">1.2.2.</span> <span class="nav-text">开闭原则（Open Close Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#里氏替换原则（Liskov-Substitution-Principle）-1"><span class="nav-number">1.2.3.</span> <span class="nav-text">里氏替换原则（Liskov Substitution Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#接口隔离原则（Interface-Segregation-Principle）-1"><span class="nav-number">1.2.4.</span> <span class="nav-text">接口隔离原则（Interface Segregation Principle）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#迪米特法则（Law-Of-Demeter）-1"><span class="nav-number">1.2.5.</span> <span class="nav-text">迪米特法则（Law Of Demeter）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#依赖倒置原则（Dependence-Inversion-Principle）-1"><span class="nav-number">1.2.6.</span> <span class="nav-text">依赖倒置原则（Dependence Inversion Principle）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模式"><span class="nav-number">2.</span> <span class="nav-text">模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#基本概念-1"><span class="nav-number">2.1.</span> <span class="nav-text">基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建型模式"><span class="nav-number">2.1.1.</span> <span class="nav-text">创建型模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#结构型模式"><span class="nav-number">2.1.2.</span> <span class="nav-text">结构型模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#行为型模式"><span class="nav-number">2.1.3.</span> <span class="nav-text">行为型模式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我的理解-1"><span class="nav-number">2.2.</span> <span class="nav-text">我的理解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#观察者模式和发布订阅模式"><span class="nav-number">2.2.1.</span> <span class="nav-text">观察者模式和发布订阅模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#代理模式与面向切面"><span class="nav-number">2.2.2.</span> <span class="nav-text">代理模式与面向切面</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#访问者模式与控制反转"><span class="nav-number">2.2.3.</span> <span class="nav-text">访问者模式与控制反转</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#单例模式"><span class="nav-number">2.2.4.</span> <span class="nav-text">单例模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#原型模式"><span class="nav-number">2.2.5.</span> <span class="nav-text">原型模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#模块模式"><span class="nav-number">2.2.6.</span> <span class="nav-text">模块模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#状态模式"><span class="nav-number">2.2.7.</span> <span class="nav-text">状态模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#模板模式"><span class="nav-number">2.2.8.</span> <span class="nav-text">模板模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#命令模式"><span class="nav-number">2.2.9.</span> <span class="nav-text">命令模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#备忘录模式"><span class="nav-number">2.2.10.</span> <span class="nav-text">备忘录模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他待整理"><span class="nav-number">2.2.11.</span> <span class="nav-text">其他待整理</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright"> &copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">大大白</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动 v3.9.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a class="theme-link" target="_blank" href="https://theme-next.org">NexT.Gemini</a> v6.4.2</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/blog/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=6.4.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/affix.js?v=6.4.2"></script>
+
+  <script type="text/javascript" src="/blog/js/src/schemes/pisces.js?v=6.4.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=6.4.2"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=6.4.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=6.4.2"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
