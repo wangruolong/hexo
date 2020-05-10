@@ -121,7 +121,7 @@
 <meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/getBoundingClientRect.png">
 <meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/compatibilityDesktop.png">
 <meta property="og:image" content="https://ruolong.wang/2017/11/03/blog/front-end-performance/front-end-performance/compatibilityMobile.png">
-<meta property="og:updated_time" content="2020-05-10T09:31:25.012Z">
+<meta property="og:updated_time" content="2020-04-18T14:48:14.219Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="前端性能优化">
 <meta name="twitter:description" content="前端性能优化。记录了自己对前端优化的一些经验和理解。">
@@ -400,7 +400,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-05-10 17:31:25" itemprop="dateModified" datetime="2020-05-10T17:31:25+08:00">2020-05-10</time>
+                <time title="修改时间：2020-04-18 22:48:14" itemprop="dateModified" datetime="2020-04-18T22:48:14+08:00">2020-04-18</time>
               
             
           </span>
@@ -488,7 +488,7 @@
 <h2 id="懒加载和预加载"><a href="#懒加载和预加载" class="headerlink" title="懒加载和预加载"></a>懒加载和预加载</h2><p>懒加载或者按需加载，是一种很好的优化网页或应用的方式。这种方式实际上是先把你的代码在一些逻辑断点处分离开，然后在一些代码块中完成某些操作后，立即引用或即将引用另外一些新的代码块。这样加快了应用的初始加载速度，减轻了它的总体体积，因为某些代码块可能永远不会被加载。</p>
 <h3 id="路由懒加载"><a href="#路由懒加载" class="headerlink" title="路由懒加载"></a>路由懒加载</h3><p>使用react-loadable实现路由延迟加载，加快首屏载入速度。</p>
 <p>组件级别的代码分隔 react-loadable<br>使用React.lazy() 等待组件加载的时候 暂停渲染<br>PureComponent纯组件<br>在传入props的时候，仅仅比较浅层的数据变化，深层数据属性变化组件不会更新<br>深层数据的更新可以通过判断，强行触发组件更新适用场景：组件的state、props相同的情况下，组件的表现应该保持不变，则可以使用React.PureComponent提升性能</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> loadable <span class="keyword">from</span> <span class="string">'react-loadable'</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">asyncLoader</span>(<span class="params">modulePath</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> LoadableComponent = loadable(&#123;</span><br><span class="line">    loader: <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">import</span>(<span class="string">`../<span class="subst">$&#123;modulePath&#125;</span>`</span>),</span><br><span class="line">    loading: <span class="function">(<span class="params">&#123; isLoading, error &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (isLoading) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">Loading</span> /&gt;</span></span></span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (error) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">Error</span> /&gt;</span></span></span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">LoadableDashboard</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="xml"><span class="tag">&lt;<span class="name">LoadableComponent</span> /&gt;</span></span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> loadable <span class="keyword">from</span> <span class="string">'react-loadable'</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">asyncLoader</span>(<span class="params">modulePath</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> LoadableComponent = loadable(&#123;</span><br><span class="line">    loader: <span class="function"><span class="params">()</span> =&gt;</span> <span class="keyword">import</span>(<span class="string">`../<span class="subst">$&#123;modulePath&#125;</span>`</span>),</span><br><span class="line">    loading: <span class="function">(<span class="params">&#123; isLoading, error &#125;</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (isLoading) &#123;</span><br><span class="line">        <span class="keyword">return</span> &lt;Loading /&gt;</span><br><span class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (error) &#123;</span><br><span class="line">        <span class="keyword">return</span> &lt;Error /&gt;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;)</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="keyword">function</span> <span class="title">LoadableDashboard</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &lt;LoadableComponent /&gt;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h3 id="图片懒加载"><a href="#图片懒加载" class="headerlink" title="图片懒加载"></a>图片懒加载</h3><p>getBoundingClientRect用于获取某个元素相对于视窗的位置集合。集合中有top, right, bottom, left等属性。<code>rectObject = object.getBoundingClientRect();</code>rectObject.top：元素上边到视窗上边的距离;rectObject.right：元素右边到视窗左边的距离;rectObject.bottom：元素下边到视窗上边的距离;rectObject.left：元素左边到视窗左边的距离;rectObject.width：元素的宽度;rectObject.height：元素的高度;<br><img src="getBoundingClientRect.png"><br><img src="compatibilityDesktop.png"><br><img src="compatibilityMobile.png"><br>通过监听scroll实践，判断rectObject.top是否到达可视区域高度clientHeight，等到达了再把原来藏在img里面的dataUrl放到src里面，让img请求加载图片。</p>
 <h3 id="图片预加载"><a href="#图片预加载" class="headerlink" title="图片预加载"></a>图片预加载</h3><p>用<code>&lt;img/&gt;</code>事先加载<br>用<code>Image img = new Image()</code>来创建<br>用xmlhttprequest请求的时候把图片打开，让浏览器缓存住这张图片。这种做法会比较精确的控制什么时候需要预加载。但是要特别注意跨域问题。</p>
 <h2 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h2><p>用chrome的memory监测是否有内存泄漏</p>
@@ -529,8 +529,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/blog/2016/01/03/blog/hexo/hexo/" rel="next" title="使用hexo搭建个人博客">
-                <i class="fa fa-chevron-left"></i> 使用hexo搭建个人博客
+              <a href="/blog/2017/11/03/blog/basic-knowledge/basic-knowledge/" rel="next" title="前端基础技能">
+                <i class="fa fa-chevron-left"></i> 前端基础技能
               </a>
             
           </div>
@@ -539,8 +539,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/blog/2017/11/03/blog/basic-knowledge/basic-knowledge/" rel="prev" title="前端基础技能">
-                前端基础技能 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2018/01/03/blog/git/git/" rel="prev" title="Git">
+                Git <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
